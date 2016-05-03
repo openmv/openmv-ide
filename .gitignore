@@ -1,0 +1,6 @@
+/build/
+*.autosave
+*.pro.user
+*.pyc
+Thumbs.db
+.DS_Store
