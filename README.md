@@ -1,5 +1,5 @@
 # openmv-ide #
-QtCreator based OpenMV IDE
+Qt Creator based OpenMV IDE
 
 * Install 7-Zip and add it to PATH.
 * Install Python 2.7 and add it to PATH.
