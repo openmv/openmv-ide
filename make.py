@@ -35,6 +35,17 @@ def find_qtdir():
                     path = ':' + os.path.join(qtdir, "bin")
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return qtdir
+    elif sys.platform.startswith('linux'):
+        qtdir = match(os.path.expanduser('~'), r"Qt")
+        if qtdir:
+            qtdir = match(qtdir, r"\d\.\d")
+            if qtdir:
+                qtdir = search(qtdir, r"gcc")
+                if qtdir:
+                    os.environ["QTDIR"] = qtdir
+                    path = ':' + os.path.join(qtdir, "bin")
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return qtdir
     return None
 
 def find_mingwdir():
@@ -76,6 +87,15 @@ def find_ifdir():
                 os.environ["PATH"] = os.environ["PATH"] + path
                 return ifdir
     elif sys.platform.startswith('darwin'):
+        ifdir = match(os.path.expanduser('~'), r"Qt")
+        if ifdir:
+            ifdir = search(ifdir, r"QtIFW")
+            if ifdir:
+                os.environ["IFDIR"] = ifdir
+                path = ';' + os.path.join(ifdir, "bin")
+                os.environ["PATH"] = os.environ["PATH"] + path
+                return ifdir
+    elif sys.platform.startswith('linux'):
         ifdir = match(os.path.expanduser('~'), r"Qt")
         if ifdir:
             ifdir = search(ifdir, r"QtIFW")
@@ -134,8 +154,8 @@ def make():
 
     else:
         if os.system("cd " + builddir +
-        " && qmake ../qt-creator/qtcreator.pro -r" +
-        " && make -j" + str(cpus) +
+        " && qmake ../qt-creator/qtcreator.pro -r -spec linux-g++" +
+        " && make -r -w -j" + str(cpus) +
         " && make installer INSTALL_ROOT="+installdir + " IFW_PATH="+ifdir):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.run"))[0]
