@@ -149,8 +149,8 @@ def make():
         " && make -j" + str(cpus) +
         " && make deployqt"):
             sys.exit("Make Failed...")
-        os.system("make codesign SIGNING_IDENTITY=Application")
-        if os.system("make dmg"):
+        os.system("cd " + builddir + " && make codesign SIGNING_IDENTITY=Application")
+        if os.system("cd " + builddir + " && make dmg"):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.dmg"))[0]
 
