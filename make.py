@@ -147,8 +147,10 @@ def make():
         if os.system("cd " + builddir +
         " && qmake ../qt-creator/qtcreator.pro -r -spec macx-clang CONFIG+=x86_64" +
         " && make -j" + str(cpus) +
-        " && make deployqt" +
-        " && make dmg"):
+        " && make deployqt"):
+            sys.exit("Make Failed...")
+        os.system("make codesign SIGNING_IDENTITY=Application")
+        if os.system("make dmg"):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.dmg"))[0]
 
