@@ -181,10 +181,10 @@ Cross Compiling OpenMV-IDE
 	sftp> put openmv-ide-linux-arm-1.6.0-installer-archive.7z
 	sftp> exit
 
-5. Install in on your RPi, running the following on your RPi:
+5. Install it on your RPi, by running the following on your RPi:
 	$ mkdir ~/openmvide
 	$ cd ~/openmvide
-	$ 7z x openmv-ide-linux-arm-1.6.0-installer-archive.7z
+	$ 7z x ../openmv-ide-linux-arm-1.6.0-installer-archive.7z
 
 6. The openmvide application should now be ready to use on your RPi.
 	At this point, follow the OpenMV-IDE website instructions for
