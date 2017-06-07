@@ -28,7 +28,7 @@ for cross-compiling unless you need to rebuild the sysroot for system updates.
 Cross Compiling Qt 5.6.2
 ------------------------
 
-1. Create a sysroot image to use on your RPi:
+1. Create the OS image for your RPi and a sysroot image of it for use on the Host PC:
 
     1. Download latest Raspbian Jessie SDCard image from:
 		https://www.raspberrypi.org/downloads/raspbian/
@@ -37,12 +37,12 @@ Cross Compiling Qt 5.6.2
 		This can either be the same SDCard you plan to use with your RPi for running
 		OpenMV-IDE or can be a separate SDCard used only for the cross-compile process.
 
-    3. Boot and configure your RPi as needed for your monitor and expand the SDCard
+    3. Boot your RPi from the SDCard and configure your RPi as needed for your monitor and expand the SDCard
 
     4. Enable source code packages by editing the sources.list:
           ```
           $ cd /etc/apt
-          $ nano sources.list
+          $ sudo nano sources.list
           (Remove the comment on the "deb-src" lines and save the file)
           ```
 
@@ -60,9 +60,7 @@ Cross Compiling Qt 5.6.2
           $ sudo apt-get install chrpath
           $ sudo apt-get install p7zip-full
           ```
-    7. Install additional build dependencies for OpenMV-IDE:
-		Note: If in the future OpenMV-IDE dependencies change as new functionality is added, this
-		list will have to be updated and a new sysroot image will have to be created:
+    7. Install additional build dependencies for OpenMV-IDE.  Note: If in the future OpenMV-IDE dependencies change as new functionality is added, this list will have to be updated and a new sysroot image will have to be created:
           ```
           $ sudo apt-get install libusb-1.0.0 libusb-1.0.0-dev libusb-dev python-pip
           $ sudo pip install pyusb
@@ -73,7 +71,7 @@ Cross Compiling Qt 5.6.2
     1. Enable source code packages by editing the sources.list:
           ```
           $ cd /etc/apt
-          $ nano sources.list
+          $ sudo nano sources.list
           (Remove the comment on the "deb-src" lines and save the file)
           ```
     2. Install Qt and OpenMV-IDE build dependencies so that all build-essential
@@ -100,7 +98,7 @@ Cross Compiling Qt 5.6.2
           $ git clone https://github.com/raspberrypi/tools
           ```
 
-3. Copy the sysroot to the Host PC.  Here, you have two options.  Do one of the following:
+3. Copy the sysroot to the Host PC.  Here, you have two options.  Do *one* of the following:
 
     1. You can shutdown the RPi and mount the SDCard on your Host PC and copy the necessary files to your working copy.  Replace <card-path> with the correct mount path to your SDCard:
           ```
@@ -122,9 +120,7 @@ Cross Compiling Qt 5.6.2
           $ rsync -avz pi@raspberrypi.local:/opt/vc sysroot/opt
           ```
 
-4. Update the symlinks in the sysroot copy on the Host PC:
-	This downloads a helper script that will automatically fix all
-	absolute symlink paths in the copied sysroot to be relative symlinks:
+4. Update the symlinks in the sysroot copy on the Host PC.  This downloads a helper script that will automatically fix all absolute symlink paths in the copied sysroot to be relative symlinks:
      ```
      $ cd ~/raspi
      $ wget https://raw.githubusercontent.com/riscv/riscv-poky/master/scripts/sysroot-relativelinks.py
