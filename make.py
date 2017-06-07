@@ -156,7 +156,7 @@ def make():
 
     else:
         if os.system("cd " + builddir +
-        " && qmake ../qt-creator/qtcreator.pro -r -spec linux-g++" +
+        " && qmake ../qt-creator/qtcreator.pro -r" +
         " && make -r -w -j" + str(cpus) +
         " && make installer INSTALL_ROOT="+installdir + " IFW_PATH="+ifdir):
             sys.exit("Make Failed...")
