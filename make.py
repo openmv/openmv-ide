@@ -188,6 +188,8 @@ def make():
 
     if args.upload:
         remotedir = os.path.splitext(os.path.basename(installer))[0]
+        if args.rpi: # Remove .tar
+            remotedir = os.path.splitext(remotedir)[0]
         uploaddir = os.path.join(builddir, remotedir)
 
         if not os.path.exists(uploaddir):
