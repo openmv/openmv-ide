@@ -12,11 +12,16 @@ def search(d0, d1):
     x = [x for x in os.listdir(d0) if re.search(d1, x)]
     return os.path.join(d0, x[0]) if x else None
 
-def find_qtdir():
-    if sys.platform.startswith('win'):
+def find_qtdir(rpi):
+    if rpi:
+        os.environ["QTDIR"] = rpi
+        path = os.path.join(rpi, "bin") + ':'
+        os.environ["PATH"] = path + os.environ["PATH"]
+        return rpi
+    elif sys.platform.startswith('win'):
         qtdir = match(os.sep, r"Qt")
         if qtdir:
-            qtdir = match(qtdir, r"\d\.\d")
+            qtdir = match(qtdir, r"\d\.\d(\.\d)?")
             if qtdir:
                 qtdir = search(qtdir, r"mingw")
                 if qtdir:
@@ -27,7 +32,7 @@ def find_qtdir():
     elif sys.platform.startswith('darwin'):
         qtdir = match(os.path.expanduser('~'), r"Qt")
         if qtdir:
-            qtdir = match(qtdir, r"\d\.\d")
+            qtdir = match(qtdir, r"\d\.\d(\.\d)?")
             if qtdir:
                 qtdir = search(qtdir, r"clang")
                 if qtdir:
@@ -38,7 +43,7 @@ def find_qtdir():
     elif sys.platform.startswith('linux'):
         qtdir = match(os.path.expanduser('~'), r"Qt")
         if qtdir:
-            qtdir = match(qtdir, r"\d\.\d")
+            qtdir = match(qtdir, r"\d\.\d(\.\d)?")
             if qtdir:
                 qtdir = search(qtdir, r"gcc")
                 if qtdir:
@@ -92,7 +97,7 @@ def find_ifdir():
             ifdir = search(ifdir, r"QtIFW")
             if ifdir:
                 os.environ["IFDIR"] = ifdir
-                path = ';' + os.path.join(ifdir, "bin")
+                path = ':' + os.path.join(ifdir, "bin")
                 os.environ["PATH"] = os.environ["PATH"] + path
                 return ifdir
     elif sys.platform.startswith('linux'):
@@ -101,7 +106,7 @@ def find_ifdir():
             ifdir = search(ifdir, r"QtIFW")
             if ifdir:
                 os.environ["IFDIR"] = ifdir
-                path = ';' + os.path.join(ifdir, "bin")
+                path = ':' + os.path.join(ifdir, "bin")
                 os.environ["PATH"] = os.environ["PATH"] + path
                 return ifdir
     return None
@@ -113,16 +118,22 @@ def make():
     parser = argparse.ArgumentParser(description =
     "Make Script")
 
+    parser.add_argument("--rpi", nargs = '?',
+    help = "Cross Compile QTDIR for the Raspberry Pi")
+
     parser.add_argument("-u", "--upload", nargs = '?',
     help = "FTP Password")
 
     args = parser.parse_args()
 
+    if args.rpi and not sys.platform.startswith('linux'):
+        sys.exit("Linux Only")
+
     ###########################################################################
 
     cpus = multiprocessing.cpu_count()
 
-    qtdir = find_qtdir()
+    qtdir = find_qtdir(args.rpi)
     mingwdir = find_mingwdir()
     qtcdir = find_qtcdir()
     ifdir = find_ifdir()
@@ -135,7 +146,15 @@ def make():
 
     installer = ""
 
-    if sys.platform.startswith('win'):
+    if args.rpi:
+        if os.system("cd " + builddir +
+        " && qmake ../qt-creator/qtcreator.pro -r" +
+        " && make -r -w -j" + str(cpus) +
+        " && make bindist INSTALL_ROOT="+installdir):
+            sys.exit("Make Failed...")
+        installer = glob.glob(os.path.join(builddir, "openmv-ide-*.tar.gz"))[0]
+
+    elif sys.platform.startswith('win'):
         if os.system("cd " + builddir +
         " && qmake ../qt-creator/qtcreator.pro -r -spec win32-g++" +
         " && jom -j" + str(cpus) +
@@ -154,13 +173,16 @@ def make():
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.dmg"))[0]
 
-    else:
+    elif sys.platform.startswith('linux'):
         if os.system("cd " + builddir +
-        " && qmake ../qt-creator/qtcreator.pro -r" +
+        " && qmake ../qt-creator/qtcreator.pro -r -spec linux-g++" +
         " && make -r -w -j" + str(cpus) +
         " && make installer INSTALL_ROOT="+installdir + " IFW_PATH="+ifdir):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.run"))[0]
+
+    else:
+        sys.exit("Unknown Platform")
 
     ###########################################################################
 
@@ -179,3 +201,4 @@ def make():
 
 if __name__ == "__main__":
     make()
+
