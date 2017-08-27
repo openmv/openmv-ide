@@ -147,8 +147,25 @@ def make():
     installer = ""
 
     if args.rpi:
+        # Add Fonts...
+        if os.path.exists(os.path.join(installdir, "lib/Qt/lib/fonts")):
+            shutil.rmtree(os.path.join(installdir, "lib/Qt/lib/fonts"), ignore_errors = True)
         shutil.copytree(os.path.join(__folder__, "dejavu-fonts/fonts/"),
                         os.path.join(installdir, "lib/Qt/lib/fonts"))
+        # Add README.txt...
+        with open(os.path.join(installdir, "README.txt"), 'w') as f:
+            f.write("Please run setup.sh to install dependencies.\n\n")
+        # Add setup.sh...
+        with open(os.path.join(installdir, "setup.sh"), 'w') as f:
+            f.write("sudo apt-get install -y libxcb*\n")
+            f.write("if [ -z \"${QT_QPA_PLATFORM}\" ]; then\n")
+            f.write("    echo >> ~/.bashrc\n")
+            f.write("    echo \"# Force Qt Apps to use xcb\" >> ~/.bashrc\n")
+            f.write("    echo \"export QT_QPA_PLATFORM=xcb\" >> ~/.bashrc\n")
+            f.write("    echo\n")
+            f.write("    echo Please type \"source ~/.bashrc\".\n")
+            f.write("fi\n\n")
+        # Build...
         if os.system("cd " + builddir +
         " && qmake ../qt-creator/qtcreator.pro -r" +
         " && make -r -w -j" + str(cpus) +
