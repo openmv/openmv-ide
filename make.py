@@ -2,7 +2,7 @@
 
 # by: Kwabena W. Agyeman - kwagyeman@openmv.io
 
-import argparse, glob, multiprocessing, os, re, shutil, sys, subprocess
+import argparse, glob, multiprocessing, os, re, shutil, stat, sys, subprocess
 
 def match(d0, d1):
     x = [x for x in os.listdir(d0) if re.match(d1, x)]
@@ -154,10 +154,34 @@ def make():
                         os.path.join(installdir, "lib/Qt/lib/fonts"))
         # Add README.txt...
         with open(os.path.join(installdir, "README.txt"), 'w') as f:
-            f.write("Please run setup.sh to install dependencies.\n\n")
+            f.write("Please run setup.sh to install OpenMV IDE dependencies... e.g.\n\n")
+            f.write("chmod +x setup.sh\n")
+            f.write("./setup.sh\n\n")
+            f.write("source ~/.bashrc\n\n")
+            f.write("./bin/openmvide.sh\n\n")
         # Add setup.sh...
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
-            f.write("sudo apt-get install -y libxcb*\n")
+            f.write("#! /bin/sh\n\n")
+            f.write("sudo apt-get install -y libxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip\n")
+            f.write("sudo pip install pyusb\n\n")
+            f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
+            f.write("sudo udevadm control --reload-rules\n\n")
+            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0.bak ]; then\n")
+            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0 /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0.bak\n")
+            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libEGL.so /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0\n")
+            # DISABLE f.write("fi\n\n")
+            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libEGL.so.1.bak ]; then\n")
+            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libEGL.so.1 /usr/lib/arm-linux-gnueabihf/libEGL.so.1.bak\n")
+            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libEGL.so /usr/lib/arm-linux-gnueabihf/libEGL.so.1\n")
+            # DISABLE f.write("fi\n\n")
+            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0.bak ]; then\n")
+            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0 /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0.bak\n")
+            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libGLESv2.so /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0\n")
+            # DISABLE f.write("fi\n\n")
+            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.bak ]; then\n")
+            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2 /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.bak\n")
+            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libGLESv2.so /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2\n")
+            # DISABLE f.write("fi\n\n")
             f.write("if [ -z \"${QT_QPA_PLATFORM}\" ]; then\n")
             f.write("    echo >> ~/.bashrc\n")
             f.write("    echo \"# Force Qt Apps to use xcb\" >> ~/.bashrc\n")
@@ -165,6 +189,8 @@ def make():
             f.write("    echo\n")
             f.write("    echo Please type \"source ~/.bashrc\".\n")
             f.write("fi\n\n")
+        os.chmod(os.path.join(installdir, "setup.sh"),
+            os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         # Build...
         if os.system("cd " + builddir +
         " && qmake ../qt-creator/qtcreator.pro -r" +
@@ -193,6 +219,27 @@ def make():
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.dmg"))[0]
 
     elif sys.platform.startswith('linux'):
+        # Add Fonts...
+        if os.path.exists(os.path.join(installdir, "lib/Qt/lib/fonts")):
+            shutil.rmtree(os.path.join(installdir, "lib/Qt/lib/fonts"), ignore_errors = True)
+        shutil.copytree(os.path.join(__folder__, "dejavu-fonts/fonts/"),
+                        os.path.join(installdir, "lib/Qt/lib/fonts"))
+        # Add README.txt...
+        with open(os.path.join(installdir, "README.txt"), 'w') as f:
+            f.write("Please run setup.sh to install OpenMV IDE dependencies... e.g.\n\n")
+            f.write("chmod +x setup.sh\n")
+            f.write("./setup.sh\n\n")
+            f.write("./bin/openmvide.sh\n\n")
+        # Add setup.sh...
+        with open(os.path.join(installdir, "setup.sh"), 'w') as f:
+            f.write("#! /bin/sh\n\n")
+            f.write("sudo apt-get install -y libusb-1.0 python-pip\n")
+            f.write("sudo pip install pyusb\n\n")
+            f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
+            f.write("sudo udevadm control --reload-rules\n\n")
+        os.chmod(os.path.join(installdir, "setup.sh"),
+            os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        # Build...
         if os.system("cd " + builddir +
         " && qmake ../qt-creator/qtcreator.pro -r -spec linux-g++" +
         " && make -r -w -j" + str(cpus) +
