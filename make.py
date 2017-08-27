@@ -147,6 +147,8 @@ def make():
     installer = ""
 
     if args.rpi:
+        shutil.copytree(os.path.join(__folder__, "dejavu-fonts/fonts/"),
+                        os.path.join(installdir, "lib/Qt/lib/fonts"))
         if os.system("cd " + builddir +
         " && qmake ../qt-creator/qtcreator.pro -r" +
         " && make -r -w -j" + str(cpus) +
