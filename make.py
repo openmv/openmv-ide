@@ -155,7 +155,6 @@ def make():
         # Add README.txt...
         with open(os.path.join(installdir, "README.txt"), 'w') as f:
             f.write("Please run setup.sh to install OpenMV IDE dependencies... e.g.\n\n")
-            f.write("chmod +x setup.sh\n")
             f.write("./setup.sh\n\n")
             f.write("source ~/.bashrc\n\n")
             f.write("./bin/openmvide.sh\n\n")
@@ -166,22 +165,6 @@ def make():
             f.write("sudo pip install pyusb\n\n")
             f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
             f.write("sudo udevadm control --reload-rules\n\n")
-            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0.bak ]; then\n")
-            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0 /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0.bak\n")
-            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libEGL.so /usr/lib/arm-linux-gnueabihf/libEGL.so.1.0.0\n")
-            # DISABLE f.write("fi\n\n")
-            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libEGL.so.1.bak ]; then\n")
-            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libEGL.so.1 /usr/lib/arm-linux-gnueabihf/libEGL.so.1.bak\n")
-            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libEGL.so /usr/lib/arm-linux-gnueabihf/libEGL.so.1\n")
-            # DISABLE f.write("fi\n\n")
-            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0.bak ]; then\n")
-            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0 /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0.bak\n")
-            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libGLESv2.so /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.0.0\n")
-            # DISABLE f.write("fi\n\n")
-            # DISABLE f.write("if [ ! -f /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.bak ]; then\n")
-            # DISABLE f.write("    sudo mv /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2 /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2.bak\n")
-            # DISABLE f.write("    sudo ln -s /opt/vc/lib/libGLESv2.so /usr/lib/arm-linux-gnueabihf/libGLESv2.so.2\n")
-            # DISABLE f.write("fi\n\n")
             f.write("if [ -z \"${QT_QPA_PLATFORM}\" ]; then\n")
             f.write("    echo >> ~/.bashrc\n")
             f.write("    echo \"# Force Qt Apps to use xcb\" >> ~/.bashrc\n")
@@ -227,7 +210,6 @@ def make():
         # Add README.txt...
         with open(os.path.join(installdir, "README.txt"), 'w') as f:
             f.write("Please run setup.sh to install OpenMV IDE dependencies... e.g.\n\n")
-            f.write("chmod +x setup.sh\n")
             f.write("./setup.sh\n\n")
             f.write("./bin/openmvide.sh\n\n")
         # Add setup.sh...
