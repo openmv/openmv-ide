@@ -225,7 +225,7 @@ def make():
         if os.system("cd " + builddir +
         " && qmake ../qt-creator/qtcreator.pro -r -spec linux-g++" +
         " && make -r -w -j" + str(cpus) +
-        " && make installer INSTALL_ROOT="+installdir + " IFW_PATH="+ifdir):
+        " && make installer INSTALL_ROOT="+installdir + " IFW_PATH="+str(ifdir)):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.run"))[0]
 
