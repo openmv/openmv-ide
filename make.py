@@ -161,7 +161,7 @@ def make():
         # Add setup.sh...
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
             f.write("#! /bin/sh\n\n")
-            f.write("sudo apt-get install -y libxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip\n")
+            f.write("sudo apt-get install -y libpng* libxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip\n")
             f.write("sudo pip install pyusb\n\n")
             f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
             f.write("sudo udevadm control --reload-rules\n\n")
@@ -228,7 +228,7 @@ def make():
         # Add setup.sh...
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
             f.write("#! /bin/sh\n\n")
-            f.write("sudo apt-get install -y libusb-1.0 python-pip\n")
+            f.write("sudo apt-get install -y libpng* libusb-1.0 python-pip\n")
             f.write("sudo pip install pyusb\n\n")
             f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
             f.write("sudo udevadm control --reload-rules\n\n")
