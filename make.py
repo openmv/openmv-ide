@@ -161,7 +161,7 @@ def make():
         # Add setup.sh...
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
             f.write("#! /bin/sh\n\n")
-            f.write("sudo apt-get install -y libxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip\n")
+            f.write("sudo apt-get install -y libpng* libxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip\n")
             f.write("sudo pip install pyusb\n\n")
             f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
             f.write("sudo udevadm control --reload-rules\n\n")
@@ -171,6 +171,19 @@ def make():
             f.write("    echo \"export QT_QPA_PLATFORM=xcb\" >> ~/.bashrc\n")
             f.write("    echo\n")
             f.write("    echo Please type \"source ~/.bashrc\".\n")
+            f.write("fi\n\n")
+            f.write("# Make sure hard linked libts library is there\n\n")
+            f.write("LINK=/usr/lib/arm-linux-gnueabihf/libts-0.0.so.0\n")
+            f.write("if [ ! -e ${LINK} ]\n")
+            f.write("then\n")
+            f.write("   TSLIB=`find /usr/lib/arm-linux-gnueabihf/ -type f -name libts.so*`\n")
+            f.write("   if [ ! -z ${TSLIB} ]\n")
+            f.write("   then\n")
+            f.write("       sudo ln -s ${TSLIB} ${LINK}\n")
+            f.write("   else\n")
+            f.write("       echo \"Could not find libts library\"\n")
+            f.write("       exit 1\n")
+            f.write("   fi\n")
             f.write("fi\n\n")
         os.chmod(os.path.join(installdir, "setup.sh"),
             os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
@@ -215,7 +228,7 @@ def make():
         # Add setup.sh...
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
             f.write("#! /bin/sh\n\n")
-            f.write("sudo apt-get install -y libusb-1.0 python-pip\n")
+            f.write("sudo apt-get install -y libpng* libusb-1.0 python-pip\n")
             f.write("sudo pip install pyusb\n\n")
             f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
             f.write("sudo udevadm control --reload-rules\n\n")
