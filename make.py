@@ -156,7 +156,7 @@ def make():
         with open(os.path.join(installdir, "README.txt"), 'w') as f:
             f.write("Please run setup.sh to install OpenMV IDE dependencies... e.g.\n\n")
             f.write("./setup.sh\n\n")
-            f.write("source ~/.bashrc\n\n")
+            f.write("source ~/.profile\n\n")
             f.write("./bin/openmvide\n\n")
         # Add setup.sh...
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
@@ -167,11 +167,11 @@ def make():
             f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
             f.write("sudo udevadm control --reload-rules\n\n")
             f.write("if [ -z \"${QT_QPA_PLATFORM}\" ]; then\n")
-            f.write("    echo >> ~/.bashrc\n")
-            f.write("    echo \"# Force Qt Apps to use xcb\" >> ~/.bashrc\n")
-            f.write("    echo \"export QT_QPA_PLATFORM=xcb\" >> ~/.bashrc\n")
+            f.write("    echo >> ~/.profile\n")
+            f.write("    echo \"# Force Qt Apps to use xcb\" >> ~/.profile\n")
+            f.write("    echo \"export QT_QPA_PLATFORM=xcb\" >> ~/.profile\n")
             f.write("    echo\n")
-            f.write("    echo Please type \"source ~/.bashrc\".\n")
+            f.write("    echo Please type \"source ~/.profile\".\n")
             f.write("fi\n\n")
             f.write("# Make sure hard linked libts library is there\n\n")
             f.write("LINK=/usr/lib/arm-linux-gnueabihf/libts-0.0.so.0\n")
