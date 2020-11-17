@@ -161,14 +161,7 @@ def make():
         # Add setup.sh...
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
             f.write("#! /bin/sh\n\n")
-            f.write("# https://stackoverflow.com/a/246128\n")
-            f.write("SOURCE=\"${BASH_SOURCE[0]}\"\n")
-            f.write("while [ -h \"$SOURCE\" ]; do\n")
-            f.write("  DIR=\"$( cd -P \"$( dirname \"$SOURCE\" )\" >/dev/null 2>&1 && pwd )\"\n")
-            f.write("  SOURCE=\"$(readlink \"$SOURCE\")\"\n")
-            f.write("  [[ $SOURCE != /* ]] && SOURCE=\"$DIR/$SOURCE\"\n")
-            f.write("done\n")
-            f.write("DIR=\"$( cd -P \"$( dirname \"$SOURCE\" )\" >/dev/null 2>&1 && pwd )\"\n")
+            f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n")
             f.write("sudo apt-get install -y ibxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip libgles2-mesa-dev libpng12-dev qt5-default libts-dev\n")
             f.write("sudo pip install pyusb\n\n")
             f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
@@ -209,6 +202,7 @@ def make():
             f.write("Categories=Development\n")
             f.write("MimeType=text/x-python\n")
             f.write("EOM\n")
+            f.write("            echo \"You must logout and login again for the desktop shortcut to work.\"\n")
             f.write("            exit 0\n")
             f.write("            ;;\n")
             f.write("        [Nn][Oo]|[Nn])\n")
