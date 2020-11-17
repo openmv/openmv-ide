@@ -167,7 +167,7 @@ def make():
             f.write("  DIR=\"$( cd -P \"$( dirname \"$SOURCE\" )\" >/dev/null 2>&1 && pwd )\"\n")
             f.write("  SOURCE=\"$(readlink \"$SOURCE\")\"\n")
             f.write("  [[ $SOURCE != /* ]] && SOURCE=\"$DIR/$SOURCE\"\n")
-            f.write("  done\n")
+            f.write("done\n")
             f.write("DIR=\"$( cd -P \"$( dirname \"$SOURCE\" )\" >/dev/null 2>&1 && pwd )\"\n")
             f.write("sudo apt-get install -y ibxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip libgles2-mesa-dev libpng12-dev qt5-default libts-dev\n")
             f.write("sudo pip install pyusb\n\n")
