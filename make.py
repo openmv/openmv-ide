@@ -236,10 +236,18 @@ def make():
         " && make -j" + str(cpus) +
         " && make deployqt"):
             sys.exit("Make Failed...")
-        os.system("cd " + builddir + " && make codesign SIGNING_IDENTITY=Application")
+        os.system("cd " + builddir + " && make codesign SIGNING_IDENTITY=Application SIGNING_FLAGS=\"--force --options=runtime --timestamp\"")
+        if os.system("cd " + builddir +
+        " && ditto -c -k -rsrc --sequesterRsrc --keepParent bin/OpenMV\\ IDE.app OpenMV\\ IDE.zip"
+        " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait"
+        " && xcrun stapler staple bin/OpenMV\\ IDE.app"):
+            sys.exit("Make Failed...")
         if os.system("cd " + builddir + " && make dmg"):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.dmg"))[0]
+        if os.system("cd " + builddir + " && xcrun notarytool submit " + installer + " --keychain-profile \"AC_PASSWORD\" --wait"
+        " && xcrun stapler staple " + installer):
+            sys.exit("Make Failed...")
 
     elif sys.platform.startswith('linux'):
         # Add Fonts...
