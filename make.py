@@ -8,9 +8,15 @@ def match(d0, d1):
     x = [x for x in os.listdir(d0) if re.match(d1, x)]
     return os.path.join(d0, x[0]) if x else None
 
+def match_all(d0, d1):
+    return [os.path.join(d0, x) for x in os.listdir(d0) if re.match(d1, x)]
+
 def search(d0, d1):
     x = [x for x in os.listdir(d0) if re.search(d1, x)]
     return os.path.join(d0, x[0]) if x else None
+
+def search_all(d0, d1):
+    return [os.path.join(d0, x) for x in os.listdir(d0) if re.search(d1, x)]
 
 def find_qtdir(rpi):
     if rpi:
@@ -21,7 +27,7 @@ def find_qtdir(rpi):
     elif sys.platform.startswith('win'):
         qtdir = match(os.sep, r"Qt")
         if qtdir:
-            qtdir = match(qtdir, r"\d\.\d(\.\d)?")
+            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
             if qtdir:
                 qtdir = search(qtdir, r"mingw")
                 if qtdir:
@@ -32,7 +38,7 @@ def find_qtdir(rpi):
     elif sys.platform.startswith('darwin'):
         qtdir = match(os.path.expanduser('~'), r"Qt")
         if qtdir:
-            qtdir = match(qtdir, r"\d\.\d(\.\d)?")
+            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
             if qtdir:
                 qtdir = search(qtdir, r"clang")
                 if qtdir:
@@ -43,7 +49,7 @@ def find_qtdir(rpi):
     elif sys.platform.startswith('linux'):
         qtdir = match(os.path.expanduser('~'), r"Qt")
         if qtdir:
-            qtdir = match(qtdir, r"\d\.\d(\.\d)?")
+            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
             if qtdir:
                 qtdir = search(qtdir, r"gcc")
                 if qtdir:
@@ -67,6 +73,34 @@ def find_mingwdir():
                     return mingwdir
     return None
 
+def find_cmakedir():
+    if sys.platform.startswith('win'):
+        cmakedir = match(os.sep, r"Qt")
+        if cmakedir:
+            cmakedir = match(cmakedir, r"Tools")
+            if cmakedir:
+                cmakedir = search(cmakedir, r"CMake")
+                if cmakedir:
+                    os.environ["CMAKEDIR"] = cmakedir
+                    path = ';' + os.path.join(cmakedir, "bin")
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return cmakedir
+    return None
+
+def find_ninjadir():
+    if sys.platform.startswith('win'):
+        ninjadir = match(os.sep, r"Qt")
+        if ninjadir:
+            ninjadir = match(ninjadir, r"Tools")
+            if ninjadir:
+                ninjadir = match(ninjadir, r"Ninja")
+                if ninjadir:
+                    os.environ["NINJADIR"] = ninjadir
+                    path = ';' + ninjadir
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return ninjadir
+    return None
+
 def find_qtcdir():
     if sys.platform.startswith('win'):
         qtcdir = match(os.sep, r"Qt")
@@ -85,12 +119,16 @@ def find_ifdir():
     if sys.platform.startswith('win'):
         ifdir = match(os.sep, r"Qt")
         if ifdir:
-            ifdir = search(ifdir, r"QtIFW")
+            ifdir = match(ifdir, r"Tools")
             if ifdir:
-                os.environ["IFDIR"] = ifdir
-                path = ';' + os.path.join(ifdir, "bin")
-                os.environ["PATH"] = os.environ["PATH"] + path
-                return ifdir
+                ifdir = match(ifdir, r"QtInstallerFramework")
+                if ifdir:
+                    ifdir = match(ifdir, r"\d+\.\d+(\.\d+)?")
+                    if ifdir:
+                        os.environ["IFDIR"] = ifdir
+                        path = ';' + os.path.join(ifdir, "bin")
+                        os.environ["PATH"] = os.environ["PATH"] + path
+                        return ifdir
     elif sys.platform.startswith('darwin'):
         ifdir = match(os.path.expanduser('~'), r"Qt")
         if ifdir:
@@ -111,6 +149,40 @@ def find_ifdir():
                 return ifdir
     return None
 
+def find_windowssdkdir():
+    if sys.platform.startswith('win'):
+        windowssdkdir = match(os.sep, r"Program Files \(x86\)")
+        if windowssdkdir:
+            windowssdkdir = match(windowssdkdir, r"Windows Kits")
+            if windowssdkdir:
+                windowssdkdir = match(windowssdkdir, r"10")
+                if windowssdkdir:
+                    windowssdkdir = match(windowssdkdir, r"bin")
+                    if windowssdkdir:
+                        for d in match_all(windowssdkdir, r"\d+\.\d+\.\d+\.\d+"):
+                            dx64 = match(d, r"x64")
+                            if dx64:
+                                dx64exe = match(dx64, r"signtool.exe")
+                                if dx64exe:
+                                    os.environ["WINDOWSSDKDIR"] = dx64
+                                    path = ';' + os.path.join(dx64)
+                                    os.environ["PATH"] = os.environ["PATH"] + path
+                                    return dx64
+                            dx86 = match(d, r"x86")
+                            if dx86:
+                                dx86exe = match(dx86, r"signtool.exe")
+                                if dx86exe:
+                                    os.environ["WINDOWSSDKDIR"] = dx86
+                                    path = ';' + os.path.join(dx86)
+                                    os.environ["PATH"] = os.environ["PATH"] + path
+                                    return dx86
+    return None
+
+def get_ideversion(folder):
+    for line in reversed(list(open(os.path.join(folder, "qt-creator/cmake/QtCreatorIDEBranding.cmake")))):
+        match = re.search(r'set\(IDE_VERSION\s+"([^"]+)"\)', line)
+        if match:  return match.group(1)
+
 def make():
 
     __folder__ = os.path.dirname(os.path.abspath(__file__))
@@ -120,9 +192,6 @@ def make():
 
     parser.add_argument("--rpi", nargs = '?',
     help = "Cross Compile QTDIR for the Raspberry Pi")
-
-    parser.add_argument("-u", "--upload", nargs = '?',
-    help = "FTP Password")
 
     args = parser.parse_args()
 
@@ -135,8 +204,12 @@ def make():
 
     qtdir = find_qtdir(args.rpi)
     mingwdir = find_mingwdir()
+    cmakedir = find_cmakedir()
+    ninjadir = find_ninjadir()
     qtcdir = find_qtcdir()
     ifdir = find_ifdir()
+    windowssdk = find_windowssdkdir()
+    ideversion = get_ideversion(__folder__)
 
     builddir = os.path.join(__folder__, "build")
     installdir = os.path.join(builddir, "install")
@@ -223,10 +296,24 @@ def make():
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.tar.gz"))[0]
 
     elif sys.platform.startswith('win'):
+        installer_name = "openmv-ide-windows-" + ideversion
+        installer_archive_name = installer_name + "-installer-archive.7z"
         if os.system("cd " + builddir +
-        " && qmake ../qt-creator/qtcreator.pro -r -spec win32-g++" +
-        " && jom -j" + str(cpus) +
-        " && jom installer INSTALL_ROOT="+installdir + " IFW_PATH="+ifdir):
+        " && cmake ../qt-creator" +
+            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+            " \"-DQT_QMAKE_EXECUTABLE:FILEPATH=" + os.path.join(qtdir, "bin/qmake.exe") + "\"" +
+            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+            " \"-DCMAKE_C_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/gcc.exe") + "\"" +
+            " \"-DCMAKE_CXX_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/g++.exe") + "\"" +
+            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
+        " && cmake --build . --target all" +
+        " && cmake --install . --prefix install" +
+        " && cmake --install . --prefix install --component Dependencies" +
+        " && python -u ../qt-creator/scripts/sign.py install" +
+        " && archivegen " + installer_archive_name + " install" +
+        " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir + " -v " + ideversion + " -a " + installer_archive_name + " " + installer_name +
+        " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.exe"))[0]
 
@@ -279,23 +366,6 @@ def make():
 
     else:
         sys.exit("Unknown Platform")
-
-    ###########################################################################
-
-    if args.upload:
-        remotedir = os.path.splitext(os.path.basename(installer))[0]
-        if args.rpi: # Remove .tar
-            remotedir = os.path.splitext(remotedir)[0]
-        uploaddir = os.path.join(builddir, remotedir)
-
-        if not os.path.exists(uploaddir):
-            os.mkdir(uploaddir)
-
-        shutil.copy2(installer, uploaddir)
-
-        subprocess.check_call(["python", "ftpsync.py", "-u", "-l",
-        "ftp://upload@openmv.io:"+args.upload+"@ftp.openmv.io/"+remotedir,
-        uploaddir])
 
 if __name__ == "__main__":
     make()
