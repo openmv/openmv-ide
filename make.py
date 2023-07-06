@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # by: Kwabena W. Agyeman - kwagyeman@openmv.io
 
@@ -85,6 +85,17 @@ def find_cmakedir():
                     path = ';' + os.path.join(cmakedir, "bin")
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return cmakedir
+    if sys.platform.startswith('linux'):
+        cmakedir = match(os.path.expanduser('~'), r"Qt")
+        if cmakedir:
+            cmakedir = match(cmakedir, r"Tools")
+            if cmakedir:
+                cmakedir = search(cmakedir, r"CMake")
+                if cmakedir:
+                    os.environ["CMAKEDIR"] = cmakedir
+                    path = ':' + os.path.join(cmakedir, "bin")
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return cmakedir
     return None
 
 def find_ninjadir():
@@ -97,6 +108,17 @@ def find_ninjadir():
                 if ninjadir:
                     os.environ["NINJADIR"] = ninjadir
                     path = ';' + ninjadir
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return ninjadir
+    if sys.platform.startswith('linux'):
+        ninjadir = match(os.path.expanduser('~'), r"Qt")
+        if ninjadir:
+            ninjadir = match(ninjadir, r"Tools")
+            if ninjadir:
+                ninjadir = match(ninjadir, r"Ninja")
+                if ninjadir:
+                    os.environ["NINJADIR"] = ninjadir
+                    path = ':' + ninjadir
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return ninjadir
     return None
@@ -141,12 +163,16 @@ def find_ifdir():
     elif sys.platform.startswith('linux'):
         ifdir = match(os.path.expanduser('~'), r"Qt")
         if ifdir:
-            ifdir = search(ifdir, r"QtIFW")
+            ifdir = match(ifdir, r"Tools")
             if ifdir:
-                os.environ["IFDIR"] = ifdir
-                path = ':' + os.path.join(ifdir, "bin")
-                os.environ["PATH"] = os.environ["PATH"] + path
-                return ifdir
+                ifdir = match(ifdir, r"QtInstallerFramework")
+                if ifdir:
+                    ifdir = match(ifdir, r"\d+\.\d+(\.\d+)?")
+                    if ifdir:
+                        os.environ["IFDIR"] = ifdir
+                        path = ':' + os.path.join(ifdir, "bin")
+                        os.environ["PATH"] = os.environ["PATH"] + path
+                        return ifdir
     return None
 
 def find_windowssdkdir():
@@ -216,6 +242,9 @@ def make():
 
     if not os.path.exists(builddir):
         os.mkdir(builddir)
+
+    if not os.path.exists(installdir):
+        os.mkdir(installdir)
 
     installer = ""
 
@@ -296,6 +325,7 @@ def make():
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.tar.gz"))[0]
 
     elif sys.platform.startswith('win'):
+        # Build...
         installer_name = "openmv-ide-windows-" + ideversion
         installer_archive_name = installer_name + "-installer-archive.7z"
         if os.system("cd " + builddir +
@@ -311,9 +341,13 @@ def make():
         " && cmake --install . --prefix install" +
         " && cmake --install . --prefix install --component Dependencies" +
         " && python -u ../qt-creator/scripts/sign.py install" +
-        " && archivegen " + installer_archive_name + " install" +
-        " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir + " -v " + ideversion + " -a " + installer_archive_name + " " + installer_name +
-        " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
+        " && cd install"
+        " && archivegen ../" + installer_archive_name + " bin lib share" +
+        " && cd .."
+        " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
+            " -v " + ideversion +
+            " -a " + installer_archive_name + " " + installer_name +
+        " && python3 -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.exe"))[0]
 
@@ -337,30 +371,25 @@ def make():
             sys.exit("Make Failed...")
 
     elif sys.platform.startswith('linux'):
-        # Add Fonts...
-        if os.path.exists(os.path.join(installdir, "lib/Qt/lib/fonts")):
-            shutil.rmtree(os.path.join(installdir, "lib/Qt/lib/fonts"), ignore_errors = True)
-        shutil.copytree(os.path.join(__folder__, "dejavu-fonts/fonts/"),
-                        os.path.join(installdir, "lib/Qt/lib/fonts"))
-        # Add README.txt...
-        with open(os.path.join(installdir, "README.txt"), 'w') as f:
-            f.write("Please run setup.sh to install OpenMV IDE dependencies... e.g.\n\n")
-            f.write("./setup.sh\n\n")
-            f.write("./bin/openmvide.sh\n\n")
-        # Add setup.sh...
-        with open(os.path.join(installdir, "setup.sh"), 'w') as f:
-            f.write("#! /bin/sh\n\n")
-            f.write("sudo apt-get install -y libpng* libusb-1.0 python-pip\n")
-            f.write("sudo pip install pyusb\n\n")
-            f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
-            f.write("sudo udevadm control --reload-rules\n\n")
-        os.chmod(os.path.join(installdir, "setup.sh"),
-            os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         # Build...
+        installer_name = "openmv-ide-linux-x86_64-" + ideversion
+        installer_archive_name = installer_name + "-installer-archive.7z"
         if os.system("cd " + builddir +
-        " && qmake ../qt-creator/qtcreator.pro -r -spec linux-g++" +
-        " && make -r -w -j" + str(cpus) +
-        " && make installer INSTALL_ROOT="+installdir + " IFW_PATH="+str(ifdir)):
+        " && cmake ../qt-creator" +
+            " -Wno-dev" +
+            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
+        " && cmake --build . --target all" +
+        " && cmake --install . --prefix install" +
+        " && cmake --install . --prefix install --component Dependencies" +
+        " && cd install"
+        " && archivegen ../" + installer_archive_name + " bin lib share" +
+        " && cd .."
+        " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
+            " -v " + ideversion + " -a " + installer_archive_name +
+            " " + installer_name):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.run"))[0]
 
