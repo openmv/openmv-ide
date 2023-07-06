@@ -1,7 +1,7 @@
 # openmv-ide #
-Qt Creator based OpenMV IDE
+OpenMV IDE based on Qt Creator
 
-Instructions for Compiling OpenMV-IDE for Desktop
+Instructions for Compiling OpenMV IDE for Desktop
 =================================================
 
 * Install Qt (to the default location).
@@ -16,7 +16,7 @@ In `/`, build the ide (using the standard bare terminal):
 
 You'll find the installer in `build`.
 
-Instructions for Compiling OpenMV-IDE for the RaspberryPi on Ubuntu (64-bit)
+Instructions for Compiling OpenMV IDE for the RaspberryPi on Ubuntu (64-bit)
 ============================================================================
 
 * Install QtRpi.
@@ -35,6 +35,10 @@ You'll find the installer in `build`.
 Instructions for running the installer silently
 ===============================================
 
-https://stackoverflow.com/a/34032216
+The Qt Installer Framework features a robust set of command line actions. Using these you can install OpenMV IDE from the command line silently. You can also uninstall the IDE silently. Please note that the command line installer will not automatically delete an old installation like when in GUI mode.
 
-Note that some modifications to the above solution may be needed.
+Linux
+-----
+
+`sudo ./openmv-ide-linux-x86_64-4.0.0.run --al --am -c in`
+
