@@ -23,7 +23,7 @@ jobs:
         submodules: recursive
 
     - name: Install Qt
-      if: matrix.map.host == "windows"
+      if: matrix.map.host == 'windows'
       uses: jurplel/install-qt-action@v3
       with:
         aqtversion: '==3.1.*'
@@ -36,7 +36,7 @@ jobs:
         tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
 
     - name: Install Qt
-      if: matrix.map.host == "linux" || matrix.map.host == "mac"
+      if: matrix.map.host == 'linux' || matrix.map.host == 'mac'
       uses: jurplel/install-qt-action@v3
       with:
         aqtversion: '==3.1.*'
