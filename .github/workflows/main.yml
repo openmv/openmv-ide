@@ -33,10 +33,11 @@ jobs:
         arch: ${{ matrix.map.arch }}
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
         cache: true
+        cache-key-prefix: install-qt-action-windows
         tools: 'tools_cmake tools_ifw tools_ninja tools_mingw,qt.tools.win64_mingw810'
 
     - name: Install Qt
-      if: matrix.map.host == 'linux' || matrix.map.host == 'mac'
+      if: matrix.map.host == 'linux'
       uses: jurplel/install-qt-action@v3
       with:
         aqtversion: '==3.1.*'
@@ -47,6 +48,7 @@ jobs:
         dir: '/home/runner'
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
         cache: true
+        cache-key-prefix: install-qt-action-linux
         tools: 'tools_cmake tools_ifw tools_ninja'
 
     - name: '🏗 Build IDE'
