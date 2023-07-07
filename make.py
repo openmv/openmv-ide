@@ -2,7 +2,7 @@
 
 # by: Kwabena W. Agyeman - kwagyeman@openmv.io
 
-import argparse, glob, multiprocessing, os, re, shutil, stat, sys, subprocess
+import argparse, glob, multiprocessing, os, re, shutil, stat, sys
 
 def match(d0, d1):
     x = [x for x in os.listdir(d0) if re.match(d1, x)]
