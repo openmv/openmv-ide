@@ -1,0 +1,133 @@
+name: '🔥 IDE Build'
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        host: [windows, linux, mac]
+        arch: [win64_mingw, linux, mac]
+        suffix: [exe, run, dmg]
+    steps:
+    - name: '⏳ Checkout repository'
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.1'
+        host: ${{ matrix.host }}
+        target: 'desktop'
+        arch: ${{ matrix.arch }}
+        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport'
+        cache: true
+        tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
+
+    - name: '🏗 Build IDE'
+      run: source make.py
+
+    - name: '⬆ Upload artifacts'
+      if: github.event_name != 'pull_request'
+      uses: actions/upload-artifact@v3
+      with:
+        name: 'openmv-ide-*.${{ matrix.suffix }}'
+        path: build
+        if-no-files-found: error
+
+  stable-release:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        host: [windows, linux, mac]
+        arch: [win64_mingw, linux, mac]
+        suffix: [exe, run, dmg]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: '⏳ Checkout repository'
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: '🤌 Download artifacts'
+      uses: actions/download-artifact@v3
+      with:
+        name: 'openmv-ide-*.${{ matrix.suffix }}'
+        path: build
+
+    - name: '🔥 Create stable release'
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: true
+        files: 'openmv-ide-*.${{ matrix.suffix }}'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: '🧹 Remove artifacts'
+      uses: geekyeggo/delete-artifact@v2
+      with:
+        name: 'openmv-ide-*.${{ matrix.suffix }}'
+        failOnError: false
+
+  development-release:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        host: [windows, linux, mac]
+        arch: [win64_mingw, linux, mac]
+        suffix: [exe, run, dmg]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') == false
+    permissions:
+      contents: write
+    steps:
+    - name: '⏳ Checkout repository'
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: '🤌 Download artifacts'
+      uses: actions/download-artifact@v3
+      with:
+        name: 'openmv-ide-*.${{ matrix.suffix }}'
+        path: build
+
+    - name: '🧹 Delete old release'
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      with:
+        delete_release: true
+        tag_name: development
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: '🔥 Create development release'
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: false
+        name: Development Release
+        tag_name: development
+        body: |
+            **⚠️ This is a development release, and it may be unstable.**
+        files: 'openmv-ide-*.${{ matrix.suffix }}'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: '🧹 Remove artifacts'
+      uses: geekyeggo/delete-artifact@v2
+      with:
+        name: 'openmv-ide-*.${{ matrix.suffix }}'
+        failOnError: false
