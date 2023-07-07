@@ -32,7 +32,7 @@ jobs:
         host: ${{ matrix.map.host }}
         target: 'desktop'
         arch: ${{ matrix.map.arch }}
-        dir: '/home/runner'
+        dir: 'C:\Users\runneradmin'
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
         cache: true
         cache-key-prefix: install-qt-action-windows
@@ -54,7 +54,12 @@ jobs:
         tools: 'tools_cmake tools_ifw tools_ninja'
 
     - name: '🏗 Build IDE'
+      if: matrix.map.host == 'windows'
       run: python make.py
+
+    - name: '🏗 Build IDE'
+      if: matrix.map.host == 'linux'
+      run: sudo apt-get install -y chrpath && python make.py
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
