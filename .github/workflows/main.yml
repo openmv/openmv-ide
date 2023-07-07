@@ -31,9 +31,9 @@ jobs:
         host: ${{ matrix.map.host }}
         target: 'desktop'
         arch: ${{ matrix.map.arch }}
-        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport'
+        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
         cache: true
-        tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
+        tools: 'tools_cmake tools_ifw tools_ninja tools_mingw,qt.tools.win64_mingw810'
 
     - name: Install Qt
       if: matrix.map.host == 'linux' || matrix.map.host == 'mac'
@@ -45,7 +45,7 @@ jobs:
         target: 'desktop'
         arch: ${{ matrix.map.arch }}
         dir: '/home/runner'
-        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport'
+        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
         cache: true
         tools: 'tools_cmake tools_ifw tools_ninja'
 
