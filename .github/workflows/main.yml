@@ -32,7 +32,7 @@ jobs:
         arch: ${{ matrix.map.arch }}
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport'
         cache: true
-        tools: 'tools_cmake tools_ifw tools_ninja ${{ matrix.map.host == "windows" && "tools_mingw90" || ""}}'
+        tools: 'tools_cmake tools_ifw tools_ninja ${{ matrix.map.host == 'windows' && 'tools_mingw90' || ''}}'
 
     - name: '🏗 Build IDE'
       run: python make.py
@@ -47,6 +47,11 @@ jobs:
 
   stable-release:
     needs: build
+    runs-on: ${{ matrix.map.os }}
+    strategy:
+      matrix:
+        map: [{os: windows-latest, host: windows, arch: win64_mingw, suffix: exe},
+              {os: ubuntu-latest, host: linux, arch: gcc_64, suffix: run}]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: '⏳ Checkout repository'
@@ -76,6 +81,11 @@ jobs:
 
   development-release:
     needs: build
+    runs-on: ${{ matrix.map.os }}
+    strategy:
+      matrix:
+        map: [{os: windows-latest, host: windows, arch: win64_mingw, suffix: exe},
+              {os: ubuntu-latest, host: linux, arch: gcc_64, suffix: run}]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') == false
     permissions:
       contents: write
