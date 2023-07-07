@@ -32,7 +32,7 @@ jobs:
         arch: ${{ matrix.map.arch }}
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport'
         cache: true
-        tools: 'tools_cmake tools_ifw tools_ninja ${{ matrix.map.host == 'windows' && 'tools_mingw90' || ''}}'
+        tools: 'tools_cmake tools_ifw tools_ninja ${{ matrix.map.host == "windows" && "tools_mingw90" || ""}}'
 
     - name: '🏗 Build IDE'
       run: python make.py
