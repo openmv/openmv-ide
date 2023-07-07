@@ -23,6 +23,7 @@ jobs:
         submodules: recursive
 
     - name: Install Qt
+      if: matrix.map.host == "windows"
       uses: jurplel/install-qt-action@v3
       with:
         aqtversion: '==3.1.*'
@@ -32,7 +33,20 @@ jobs:
         arch: ${{ matrix.map.arch }}
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport'
         cache: true
-        tools: 'tools_cmake tools_ifw tools_ninja ${{ matrix.map.host == "windows" && "tools_mingw90" || ""}}'
+        tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
+
+    - name: Install Qt
+      if: matrix.map.host == "linux" || matrix.map.host == "mac"
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: '6.5.1'
+        host: ${{ matrix.map.host }}
+        target: 'desktop'
+        arch: ${{ matrix.map.arch }}
+        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport'
+        cache: true
+        tools: 'tools_cmake tools_ifw tools_ninja'
 
     - name: '🏗 Build IDE'
       run: python make.py
