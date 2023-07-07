@@ -23,7 +23,7 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Install Qt
+    - name: 'Install Qt on Windows'
       if: matrix.map.host == 'windows'
       uses: jurplel/install-qt-action@v3
       with:
@@ -38,7 +38,7 @@ jobs:
         cache-key-prefix: install-qt-action-windows
         tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
 
-    - name: Install Qt
+    - name: 'Install Qt on Linux'
       if: matrix.map.host == 'linux'
       uses: jurplel/install-qt-action@v3
       with:
@@ -53,11 +53,11 @@ jobs:
         cache-key-prefix: install-qt-action-linux
         tools: 'tools_cmake tools_ifw tools_ninja'
 
-    - name: '🏗 Build IDE'
+    - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows'
       run: python make.py
 
-    - name: '🏗 Build IDE'
+    - name: '🏗 Build IDE on Linux'
       if: matrix.map.host == 'linux'
       run: sudo apt-get install -y chrpath && python make.py
 
@@ -65,8 +65,7 @@ jobs:
       if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@v3
       with:
-        name: 'openmv-ide-*.${{ matrix.map.suffix }}'
-        path: build
+        path: 'build/openmv-ide-*.${{ matrix.map.suffix }}'
         if-no-files-found: error
 
   stable-release:
