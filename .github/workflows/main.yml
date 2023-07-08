@@ -35,7 +35,6 @@ jobs:
         dir: 'C:\Users\runneradmin'
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
         cache: true
-        cache-key-prefix: install-qt-action-windows
         tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
 
     - name: '⬇ Install Qt on Linux'
@@ -50,7 +49,6 @@ jobs:
         dir: '/home/runner'
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
         cache: true
-        cache-key-prefix: install-qt-action-linux
         tools: 'tools_cmake tools_ifw tools_ninja'
 
     - name: '🏗 Build IDE on Windows'
@@ -75,8 +73,6 @@ jobs:
     steps:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v3
-      with:
-        name: 'openmv-ide-.*'
 
     - name: '🔥 Create stable release'
       uses: softprops/action-gh-release@v1
@@ -101,8 +97,6 @@ jobs:
     steps:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v3
-      with:
-        name: 'openmv-ide-.*'
 
     - name: '🧹 Delete old release'
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
