@@ -74,11 +74,21 @@ jobs:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v3
 
+    - name: "✏️ Generate release changelog"
+      id: changelog
+      uses: mikepenz/release-changelog-builder-action@v3
+      with:
+        toTag: ${{ github.sha }}
+        configuration: '.github/workflows/changelog.json'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: '🔥 Create stable release'
       uses: softprops/action-gh-release@v1
       with:
         draft: true
         files: 'openmv-ide-*'
+        body: ${{steps.changelog.outputs.changelog}}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -106,6 +116,15 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: "✏️ Generate release changelog"
+      id: changelog
+      uses: mikepenz/release-changelog-builder-action@v3
+      with:
+        toTag: ${{ github.sha }}
+        configuration: '.github/workflows/changelog.json'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: '🔥 Create development release'
       uses: softprops/action-gh-release@v1
       with:
@@ -114,6 +133,7 @@ jobs:
         tag_name: development
         body: |
             **⚠️ This is a development release, and it may be unstable.**
+            ${{steps.changelog.outputs.changelog}}
         files: 'openmv-ide-*'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
