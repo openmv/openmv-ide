@@ -2,8 +2,8 @@
 
 OpenMV IDE based on Qt Creator.
 
-Instructions for Compiling OpenMV IDE for Desktop (windows/linux/mac)
-=====================================================================
+Instructions for Compiling OpenMV IDE for Desktop (Windows 64-bit, Ubuntu 64-bit, Mac)
+======================================================================================
 
 * Install Qt (to the default location).
 
@@ -32,7 +32,7 @@ You'll find the installer in `build`.
 Instructions for running the installer silently
 ===============================================
 
-The Qt Installer Framework features a robust set of command line actions. Using these you can install OpenMV IDE from the command line silently. You can also uninstall the IDE silently. Please note that the command line installer will not automatically delete an old installation like when in GUI mode.
+The Qt Installer Framework features a robust set of command line actions. Using these you can install OpenMV IDE from the command line silently. You can also uninstall the IDE silently. Please note that the command line installer will not automatically delete an old installation like when in GUI mode. Additionally, on linux it will not allow you to select to run root install operations.
 
 Windows
 -------
