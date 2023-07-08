@@ -107,6 +107,11 @@ jobs:
     steps:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v3
+      with:
+        path: openmv-ide
+    - name: Display structure of downloaded files
+      run: ls -R
+      working-directory: openmv-ide
 
     - name: '🧹 Delete old release'
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
@@ -135,8 +140,8 @@ jobs:
             **⚠️ This is a development release, and it may be unstable.**
             ${{steps.changelog.outputs.changelog}}
         files: |
-          openmv-ide-windows-4.0.0/openmv-ide-windows-4.0.0.exe
-          openmv-ide-linux-x86_64-4.0.0/openmv-ide-linux-x86_64-4.0.0.run
+          openmv-ide/openmv-ide-windows-4.0.0.exe
+          openmv-ide/openmv-ide-linux-x86_64-4.0.0.run
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
