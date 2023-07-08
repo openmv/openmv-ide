@@ -134,7 +134,9 @@ jobs:
         body: |
             **⚠️ This is a development release, and it may be unstable.**
             ${{steps.changelog.outputs.changelog}}
-        files: 'openmv-ide-*'
+        files: |
+          openmv-ide-windows-4.0.0/openmv-ide-windows-4.0.0.exe
+          openmv-ide-linux-x86_64-4.0.0/openmv-ide-linux-x86_64-4.0.0.run
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
