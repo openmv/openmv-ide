@@ -87,9 +87,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         draft: true
-        files: |
-          artifact/openmv-ide-windows-*.exe
-          artifact/openmv-ide-linux-x86_64-*.run
+        files: artifact/*
         body: ${{steps.changelog.outputs.changelog}}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -136,9 +134,7 @@ jobs:
         body: |
             **⚠️ This is a development release, and it may be unstable.**
             ${{steps.changelog.outputs.changelog}}
-        files: |
-          artifact/openmv-ide-windows-*.exe
-          artifact/openmv-ide-linux-x86_64-*.run
+        files: artifact/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
