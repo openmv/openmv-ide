@@ -56,6 +56,6 @@ And **potentially** required libraries (e.g. for Ubuntu):
 
 Finally, then you need to install the udev rules yourself:
 
-     cp openmv-ide/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/
-     udevadm trigger
-     udevadm control --reload-rules
+     sudo cp openmv-ide/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/
+     sudo udevadm trigger
+     sudo udevadm control --reload-rules
