@@ -23,7 +23,7 @@ jobs:
       with:
         submodules: recursive
 
-    - name: 'Install Qt on Windows'
+    - name: '⬇ Install Qt on Windows'
       if: matrix.map.host == 'windows'
       uses: jurplel/install-qt-action@v3
       with:
@@ -38,7 +38,7 @@ jobs:
         cache-key-prefix: install-qt-action-windows
         tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
 
-    - name: 'Install Qt on Linux'
+    - name: '⬇ Install Qt on Linux'
       if: matrix.map.host == 'linux'
       uses: jurplel/install-qt-action@v3
       with:
@@ -73,8 +73,8 @@ jobs:
     runs-on: ${{ matrix.map.os }}
     strategy:
       matrix:
-        map: [{os: windows-latest, host: windows, arch: win64_mingw, suffix: exe},
-              {os: ubuntu-latest, host: linux, arch: gcc_64, suffix: run}]
+        map: [{os: windows-latest, suffix: exe},
+              {os: ubuntu-latest, run}]
       fail-fast: false
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -86,7 +86,7 @@ jobs:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v3
       with:
-        path: 'openmv-ide-*.${{ matrix.map.suffix }}'
+        name: 'openmv-ide-.*?\.${{ matrix.map.suffix }}'
 
     - name: '🔥 Create stable release'
       uses: softprops/action-gh-release@v1
@@ -107,8 +107,8 @@ jobs:
     runs-on: ${{ matrix.map.os }}
     strategy:
       matrix:
-        map: [{os: windows-latest, host: windows, arch: win64_mingw, suffix: exe},
-              {os: ubuntu-latest, host: linux, arch: gcc_64, suffix: run}]
+        map: [{os: windows-latest, suffix: exe},
+              {os: ubuntu-latest, run}]
       fail-fast: false
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') == false
     permissions:
@@ -122,7 +122,7 @@ jobs:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v3
       with:
-        path: 'openmv-ide-*.${{ matrix.map.suffix }}'
+        name: 'openmv-ide-.*?\.${{ matrix.map.suffix }}'
 
     - name: '🧹 Delete old release'
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
@@ -147,5 +147,5 @@ jobs:
     - name: '🧹 Remove artifacts'
       uses: geekyeggo/delete-artifact@v2
       with:
-        path: 'openmv-ide-*.${{ matrix.map.suffix }}'
+        name: 'openmv-ide-*.${{ matrix.map.suffix }}'
         failOnError: false
