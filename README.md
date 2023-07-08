@@ -42,6 +42,8 @@ Windows
 Linux
 -----
 
+Note: `libxcb-xinerama0` may be required for the installer to run.
+
 `./openmv-ide-linux-x86_64-*.run --al --am -c in`
 
 And then you will need to manually install required libraries yourself (e.g. for Ubuntu):
@@ -51,3 +53,9 @@ And then you will need to manually install required libraries yourself (e.g. for
 And **potentially** required libraries (e.g. for Ubuntu):
 
 `sudo apt-get install -y libfontconfig1 libfreetype6 libxcb1 libxcb-glx0 libxcb-keysyms1 libxcb-image0 libxcb-shm0 libxcb-icccm4 libxcb-xfixes0 libxcb-shape0 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0`
+
+Finally, then you need to install the udev rules yourself:
+
+     cp openmv-ide/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/
+     udevadm trigger
+     udevadm control --reload-rules
