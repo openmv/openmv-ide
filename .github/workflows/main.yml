@@ -57,13 +57,24 @@ jobs:
 
     - name: '🏗 Build IDE on Linux'
       if: matrix.map.host == 'linux'
-      run: sudo apt-get install -y chrpath && python make.py
+      run: |
+        sudo apt-get install -y chrpath && python make.py
+        version = $(ls build | grep -oP 'openmv-ide-linux-x86_64-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.run)')
+        cd qt-creator/share/qtcreator
+        zip -r ../../../build/openmv-ide-resources-${version}.zip examples firmware html models 
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@v3
       with:
         path: 'build/openmv-ide-*.${{ matrix.map.suffix }}'
+        if-no-files-found: error
+  
+    - name: '⬆ Upload resources'
+      if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
+      uses: actions/upload-artifact@v3
+      with:
+        path: 'build/openmv-ide-*.zip'
         if-no-files-found: error
 
   stable-release:
@@ -106,6 +117,9 @@ jobs:
       contents: write
     steps:
     - name: '🤌 Download artifacts'
+      uses: actions/download-artifact@v3
+
+    - name: '📦 Generate resources'
       uses: actions/download-artifact@v3
 
     - name: '🧹 Delete old release'
