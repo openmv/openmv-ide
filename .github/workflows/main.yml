@@ -87,7 +87,9 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         draft: true
-        files: 'openmv-ide-*'
+        files: |
+          artifact/openmv-ide-windows-*.exe
+          artifact/openmv-ide-linux-x86_64-*.run
         body: ${{steps.changelog.outputs.changelog}}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,8 +109,6 @@ jobs:
     steps:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v3
-    - name: Display structure of downloaded files
-      run: ls -R
 
     - name: '🧹 Delete old release'
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
@@ -137,8 +137,8 @@ jobs:
             **⚠️ This is a development release, and it may be unstable.**
             ${{steps.changelog.outputs.changelog}}
         files: |
-          artifact/openmv-ide-windows-4.0.0.exe
-          artifact/openmv-ide-linux-x86_64-4.0.0.run
+          artifact/openmv-ide-windows-*.exe
+          artifact/openmv-ide-linux-x86_64-*.run
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
