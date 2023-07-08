@@ -58,7 +58,8 @@ jobs:
     - name: '🏗 Build IDE on Linux'
       if: matrix.map.host == 'linux'
       run: |
-        sudo apt-get install -y chrpath && python make.py
+        sudo apt-get install -y chrpath
+        python make.py
         version = $(ls build | grep -oP 'openmv-ide-linux-x86_64-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.run)')
         cd qt-creator/share/qtcreator
         zip -r ../../../build/openmv-ide-resources-${version}.zip examples firmware html models 
