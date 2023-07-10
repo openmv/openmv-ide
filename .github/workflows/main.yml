@@ -24,6 +24,31 @@ jobs:
       with:
         submodules: recursive
 
+    - name: '🍏 Install Apple Certificates'
+      if: matrix.map.host == 'mac'
+        env:
+          APPLICATION_CERTIFICATE_BASE64: ${{ secrets.MAC_APPLICATION_CER }}
+          APPLICATION_P12_PASSWORD: ${{ secrets.MAC_APPLICATION_CER_PASSWORD }}
+          INSTALLER_CERTIFICATE_BASE64: ${{ secrets.MAC_INSTALLER_CER }}
+          INSTALLER_P12_PASSWORD: ${{ secrets.MAC_INSTALLER_CER_PASSWORD }}
+          KEYCHAIN_PASSWORD: $${ secrets.MAC_KEYCHAIN_PASSWORD }}
+          APPLE_ID: $${ secrets.MAC_APPLE_ID }}
+          TEAM_ID: $${ secrets.MAC_TEAM_ID }}
+          NOTARYTOOL_PASSWORD: $${ secrets.MAC_2FA_PASSWORD }}
+        run: |
+          APPLICATION_CERTIFICATE_PATH=$RUNNER_TEMP/application_certificate.p12
+          INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
+          echo -n "$APPLICATION_CERTIFICATE_BASE64" | base64 --decode -o $APPLICATION_CERTIFICATE_PATH
+          echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $APPLICATION_CERTIFICATE_PATH -P "$APPLICATION_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security import $INSTALLER_CERTIFICATE_PATH -P "$INSTALLER_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          xcrun notarytool store-credentials "AC_PASSWORD" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$NOTARYTOOL_PASSWORD" --keychain $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
     - name: '⬇ Install Qt on Windows'
       if: matrix.map.host == 'windows'
       uses: jurplel/install-qt-action@v3
