@@ -407,10 +407,10 @@ def make():
         " && cd install"
         " && archivegen ../" + installer_archive_name + " bin lib share" +
         " && cd .."
-        " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
+        " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion +
             " -a " + installer_archive_name + " " + installer_name +
-        " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
+        " && python3 -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
             sys.exit("Make Failed...")
 
     elif sys.platform.startswith('darwin'):
@@ -423,14 +423,14 @@ def make():
             " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
         " && cmake --build . --target all" +
         " && cmake --install . --prefix . --component Dependencies" +
-        " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\"" +
-        " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\"" +
+        " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
+        " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true" +
         " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
-        " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait" +
-        " && xcrun stapler staple OpenMV\\ IDE.app" +
+        " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait || true" +
+        " && xcrun stapler staple OpenMV\\ IDE.app || true" +
         " && ../qt-creator/scripts/makedmg.sh OpenMV\\ IDE.app " + installer_name +
-        " && xcrun notarytool submit " + installer_name + " --keychain-profile \"AC_PASSWORD\" --wait" +
-        " && xcrun stapler staple " + installer_name):
+        " && xcrun notarytool submit " + installer_name + " --keychain-profile \"AC_PASSWORD\" --wait || true" +
+        " && xcrun stapler staple " + installer_name + " || true"):
             sys.exit("Make Failed...")
 
     elif sys.platform.startswith('linux'):
