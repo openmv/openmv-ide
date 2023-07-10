@@ -106,7 +106,7 @@ jobs:
 
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac'
-      run: python make.py --keychain $RUNNER_TEMP/app-signing.keychain-db
+      run: python make.py
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
