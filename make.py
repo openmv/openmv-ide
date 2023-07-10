@@ -50,7 +50,7 @@ def find_qtdir(rpi):
         if qtdir:
             qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
             if qtdir:
-                qtdir = search(qtdir, r"clang")
+                qtdir = match(qtdir, r"macos")
                 if qtdir:
                     os.environ["QTDIR"] = qtdir
                     path = ':' + os.path.join(qtdir, "bin")
@@ -115,6 +115,21 @@ def find_cmakedir():
                     path = ';' + os.path.join(cmakedir, "bin")
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return cmakedir
+    elif sys.platform.startswith('darwin'):
+        cmakedir = match(os.path.expanduser('~'), r"Qt")
+        if cmakedir:
+            cmakedir = match(cmakedir, r"Tools")
+            if cmakedir:
+                cmakedir = match(cmakedir, r"CMake")
+                if cmakedir:
+                    cmakedir = match(cmakedir, r"CMake.app")
+                    if cmakedir:
+                        cmakedir = match(cmakedir, r"Contents")
+                        if cmakedir:
+                            os.environ["CMAKEDIR"] = cmakedir
+                            path = ':' + os.path.join(cmakedir, "bin")
+                            os.environ["PATH"] = os.environ["PATH"] + path
+                            return cmakedir
     elif sys.platform.startswith('linux'):
         cmakedir = match(os.path.expanduser('~'), r"Qt")
         if cmakedir:
@@ -150,6 +165,17 @@ def find_ninjadir():
                     path = ';' + ninjadir
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return ninjadir
+    elif sys.platform.startswith('darwin'):
+        ninjadir = match(os.path.expanduser('~'), r"Qt")
+        if ninjadir:
+            ninjadir = match(ninjadir, r"Tools")
+            if ninjadir:
+                ninjadir = match(ninjadir, r"Ninja")
+                if ninjadir:
+                    os.environ["NINJADIR"] = ninjadir
+                    path = ':' + ninjadir
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return ninjadir
     elif sys.platform.startswith('linux'):
         ninjadir = match(os.path.expanduser('~'), r"Qt")
         if ninjadir:
@@ -161,30 +187,6 @@ def find_ninjadir():
                     path = ':' + ninjadir
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return ninjadir
-    return None
-
-def find_qtcdir():
-    if sys.platform.startswith('win'):
-        qtcdir = match(os.sep, r"Qt")
-        if qtcdir:
-            qtcdir = match(qtcdir, r"Tools")
-            if qtcdir:
-                qtcdir = match(qtcdir, r"QtCreator")
-                if qtcdir:
-                    os.environ["QTCDIR"] = qtcdir
-                    path = ';' + os.path.join(qtcdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return qtcdir
-        qtcdir = match(os.path.expanduser('~'), r"Qt")
-        if qtcdir:
-            qtcdir = match(qtcdir, r"Tools")
-            if qtcdir:
-                qtcdir = match(qtcdir, r"QtCreator")
-                if qtcdir:
-                    os.environ["QTCDIR"] = qtcdir
-                    path = ';' + os.path.join(qtcdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return qtcdir
     return None
 
 def find_ifdir():
@@ -294,9 +296,9 @@ def make():
     mingwdir = find_mingwdir()
     cmakedir = find_cmakedir()
     ninjadir = find_ninjadir()
-    qtcdir = find_qtcdir()
     ifdir = find_ifdir()
     windowssdk = find_windowssdkdir()
+
     ideversion = get_ideversion(__folder__)
 
     builddir = os.path.join(__folder__, "build")
@@ -387,7 +389,6 @@ def make():
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.tar.gz"))[0]
 
     elif sys.platform.startswith('win'):
-        # Build...
         installer_name = "openmv-ide-windows-" + ideversion
         installer_archive_name = installer_name + "-installer-archive.7z"
         if os.system("cd " + builddir +
@@ -411,29 +412,28 @@ def make():
             " -a " + installer_archive_name + " " + installer_name +
         " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
             sys.exit("Make Failed...")
-        installer = glob.glob(os.path.join(builddir, "openmv-ide-*.exe"))[0]
 
     elif sys.platform.startswith('darwin'):
+        installer_name = "openmv-ide-mac-" + ideversion + ".dmg"
         if os.system("cd " + builddir +
-        " && qmake ../qt-creator/qtcreator.pro -r -spec macx-clang CONFIG+=x86_64" +
-        " && make -j" + str(cpus) +
-        " && make deployqt"):
-            sys.exit("Make Failed...")
-        os.system("cd " + builddir + " && make codesign SIGNING_IDENTITY=Application SIGNING_FLAGS=\"--force --options=runtime --timestamp\"")
-        if os.system("cd " + builddir +
-        " && ditto -c -k -rsrc --sequesterRsrc --keepParent bin/OpenMV\\ IDE.app OpenMV\\ IDE.zip"
-        " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait"
-        " && xcrun stapler staple bin/OpenMV\\ IDE.app"):
-            sys.exit("Make Failed...")
-        if os.system("cd " + builddir + " && make dmg"):
-            sys.exit("Make Failed...")
-        installer = glob.glob(os.path.join(builddir, "openmv-ide-*.dmg"))[0]
-        if os.system("cd " + builddir + " && xcrun notarytool submit " + installer + " --keychain-profile \"AC_PASSWORD\" --wait"
-        " && xcrun stapler staple " + installer):
+        " && cmake ../qt-creator" +
+            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
+        " && cmake --build . --target all" +
+        " && cmake --install . --prefix . --component Dependencies" +
+        " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\"" +
+        " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\"" +
+        " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
+        " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait" +
+        " && xcrun stapler staple OpenMV\\ IDE.app" +
+        " && ../qt-creator/scripts/makedmg.sh OpenMV\\ IDE.app " + installer_name +
+        " && xcrun notarytool submit " + installer_name + " --keychain-profile \"AC_PASSWORD\" --wait" +
+        " && xcrun stapler staple " + installer_name):
             sys.exit("Make Failed...")
 
     elif sys.platform.startswith('linux'):
-        # Build...
         installer_name = "openmv-ide-linux-x86_64-" + ideversion
         installer_archive_name = installer_name + "-installer-archive.7z"
         if os.system("cd " + builddir +
@@ -453,7 +453,6 @@ def make():
             " -v " + ideversion + " -a " + installer_archive_name +
             " " + installer_name):
             sys.exit("Make Failed...")
-        installer = glob.glob(os.path.join(builddir, "openmv-ide-*.run"))[0]
 
     else:
         sys.exit("Unknown Platform")
