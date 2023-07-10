@@ -1,0 +1,53 @@
+{
+    "categories": [
+     {
+       "title": "ignore",
+       "labels": ["github"]
+     },
+     {
+       "title": "## 🪄 OpenMV",
+       "labels": ["openmv"]
+     },
+     {
+       "title": "## 🧬 QtCreator",
+       "labels": ["qtcreator"]
+     },
+     {
+       "title": "## 📚 Resources",
+       "labels": ["resources"]
+     }
+    ],
+    "ignore_labels": [
+       "github"
+    ],
+    "label_extractor": [
+      {
+        "pattern": "^github",
+        "method": "match",
+        "on_property": "title"
+      },
+      {
+        "pattern": "^openmv",
+        "method": "match",
+        "on_property": "title"
+      },
+      {
+        "pattern": "^qtcreator",
+        "method": "match",
+        "on_property": "title"
+      }
+    ],
+    "transformers": [
+      {
+        "pattern": "^(.*)\/(.+:.*)",
+        "target": "- $2"
+      }
+    ],
+    "sort": "DESC",
+    "template": "${{CHANGELOG}}\n\n## 🪛 Misc Fixes:\n\n${{UNCATEGORIZED}}\n",
+    "pr_template": "- ${{TITLE}}",
+    "empty_template": "- no changes",
+    "max_tags_to_fetch": 100,
+    "max_pull_requests": 100,
+    "max_back_track_time_days": 100
+}

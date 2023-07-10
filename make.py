@@ -2,7 +2,7 @@
 
 # by: Kwabena W. Agyeman - kwagyeman@openmv.io
 
-import argparse, glob, multiprocessing, os, re, shutil, stat, sys, subprocess
+import argparse, glob, multiprocessing, os, re, shutil, stat, sys
 
 def match(d0, d1):
     x = [x for x in os.listdir(d0) if re.match(d1, x)]
@@ -26,6 +26,16 @@ def find_qtdir(rpi):
         return rpi
     elif sys.platform.startswith('win'):
         qtdir = match(os.sep, r"Qt")
+        if qtdir:
+            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
+            if qtdir:
+                qtdir = search(qtdir, r"mingw")
+                if qtdir:
+                    os.environ["QTDIR"] = qtdir
+                    path = ';' + os.path.join(qtdir, "bin")
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return qtdir
+        qtdir = match(os.path.expanduser('~'), r"Qt")
         if qtdir:
             qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
             if qtdir:
@@ -71,6 +81,16 @@ def find_mingwdir():
                     path = ';' + os.path.join(mingwdir, "bin")
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return mingwdir
+        mingwdir = match(os.path.expanduser('~'), r"Qt")
+        if mingwdir:
+            mingwdir = match(mingwdir, r"Tools")
+            if mingwdir:
+                mingwdir = search(mingwdir, r"mingw")
+                if mingwdir:
+                    os.environ["MINGWDIR"] = mingwdir
+                    path = ';' + os.path.join(mingwdir, "bin")
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return mingwdir
     return None
 
 def find_cmakedir():
@@ -85,7 +105,17 @@ def find_cmakedir():
                     path = ';' + os.path.join(cmakedir, "bin")
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return cmakedir
-    if sys.platform.startswith('linux'):
+        cmakedir = match(os.path.expanduser('~'), r"Qt")
+        if cmakedir:
+            cmakedir = match(cmakedir, r"Tools")
+            if cmakedir:
+                cmakedir = search(cmakedir, r"CMake")
+                if cmakedir:
+                    os.environ["CMAKEDIR"] = cmakedir
+                    path = ';' + os.path.join(cmakedir, "bin")
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return cmakedir
+    elif sys.platform.startswith('linux'):
         cmakedir = match(os.path.expanduser('~'), r"Qt")
         if cmakedir:
             cmakedir = match(cmakedir, r"Tools")
@@ -110,7 +140,17 @@ def find_ninjadir():
                     path = ';' + ninjadir
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return ninjadir
-    if sys.platform.startswith('linux'):
+        ninjadir = match(os.path.expanduser('~'), r"Qt")
+        if ninjadir:
+            ninjadir = match(ninjadir, r"Tools")
+            if ninjadir:
+                ninjadir = match(ninjadir, r"Ninja")
+                if ninjadir:
+                    os.environ["NINJADIR"] = ninjadir
+                    path = ';' + ninjadir
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return ninjadir
+    elif sys.platform.startswith('linux'):
         ninjadir = match(os.path.expanduser('~'), r"Qt")
         if ninjadir:
             ninjadir = match(ninjadir, r"Tools")
@@ -135,11 +175,33 @@ def find_qtcdir():
                     path = ';' + os.path.join(qtcdir, "bin")
                     os.environ["PATH"] = os.environ["PATH"] + path
                     return qtcdir
+        qtcdir = match(os.path.expanduser('~'), r"Qt")
+        if qtcdir:
+            qtcdir = match(qtcdir, r"Tools")
+            if qtcdir:
+                qtcdir = match(qtcdir, r"QtCreator")
+                if qtcdir:
+                    os.environ["QTCDIR"] = qtcdir
+                    path = ';' + os.path.join(qtcdir, "bin")
+                    os.environ["PATH"] = os.environ["PATH"] + path
+                    return qtcdir
     return None
 
 def find_ifdir():
     if sys.platform.startswith('win'):
         ifdir = match(os.sep, r"Qt")
+        if ifdir:
+            ifdir = match(ifdir, r"Tools")
+            if ifdir:
+                ifdir = match(ifdir, r"QtInstallerFramework")
+                if ifdir:
+                    ifdir = match(ifdir, r"\d+\.\d+(\.\d+)?")
+                    if ifdir:
+                        os.environ["IFDIR"] = ifdir
+                        path = ';' + os.path.join(ifdir, "bin")
+                        os.environ["PATH"] = os.environ["PATH"] + path
+                        return ifdir
+        ifdir = match(os.path.expanduser('~'), r"Qt")
         if ifdir:
             ifdir = match(ifdir, r"Tools")
             if ifdir:
