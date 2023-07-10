@@ -36,11 +36,11 @@ jobs:
           TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
           NOTARYTOOL_PASSWORD: ${{ secrets.MAC_2FA_PASSWORD }}
       run: |
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
         APPLICATION_CERTIFICATE_PATH=$RUNNER_TEMP/application_certificate.p12
         INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
         echo -n "$APPLICATION_CERTIFICATE_BASE64" | base64 --decode -o $APPLICATION_CERTIFICATE_PATH
         echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
         security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -86,7 +86,9 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
+        dir: '/Users/runner'
         modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
+        cache: true
         tools: 'tools_cmake tools_ninja'
 
     - name: '🏗 Build IDE on Windows'
@@ -104,7 +106,7 @@ jobs:
 
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac'
-      run: python make.py
+      run: python make.py --keychain $RUNNER_TEMP/app-signing.keychain-db
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
