@@ -344,10 +344,10 @@ def make():
         " && cd install"
         " && archivegen ../" + installer_archive_name + " bin lib share" +
         " && cd .."
-        " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
+        " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion +
             " -a " + installer_archive_name + " " + installer_name +
-        " && python3 -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
+        " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
             sys.exit("Make Failed...")
         installer = glob.glob(os.path.join(builddir, "openmv-ide-*.exe"))[0]
 
