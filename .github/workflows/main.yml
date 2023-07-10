@@ -46,8 +46,8 @@ jobs:
         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
         security import $APPLICATION_CERTIFICATE_PATH -P "$APPLICATION_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
         security import $INSTALLER_CERTIFICATE_PATH -P "$INSTALLER_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        xcrun notarytool store-credentials "AC_PASSWORD" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$NOTARYTOOL_PASSWORD" --keychain $KEYCHAIN_PATH
         security list-keychain -d user -s $KEYCHAIN_PATH
+        xcrun notarytool store-credentials "AC_PASSWORD" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
 
     - name: '⬇ Install Qt on Windows'
       if: matrix.map.host == 'windows'
