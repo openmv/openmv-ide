@@ -2,8 +2,8 @@
 
 OpenMV IDE based on Qt Creator.
 
-Compiling OpenMV IDE for the Desktop (Windows, Linux, Mac)
-==========================================================
+Compiling OpenMV IDE for (Windows, Linux, Mac)
+==============================================
 
 * Install Qt (to the default location).
 
