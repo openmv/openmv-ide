@@ -37,6 +37,8 @@ The Qt Installer Framework features a robust set of command line actions. Using 
 Windows
 -------
 
+The installer will need administrator privileges which is should ask for when run.
+
      ./openmv-ide-windows-*.exe --al --am -c in
 
 Linux
@@ -63,7 +65,7 @@ Finally, then you need to install the udev rules yourself:
 Mac
 ---
 
-The installer is a DMG with the app inside of it:
+The installer is a DMG with the app inside of it.
 
      hdiutil attach openmv-ide-linux-mac-*.dmg
      sudo cp -rf /Volumes/OpenMV\ IDE/OpenMV\ IDE.app /Applications
