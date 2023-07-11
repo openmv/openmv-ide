@@ -2,8 +2,8 @@
 
 OpenMV IDE based on Qt Creator.
 
-Instructions for Compiling OpenMV IDE for Desktop (Windows 64-bit, Ubuntu 64-bit, Mac)
-======================================================================================
+Instructions for Compiling OpenMV IDE for Desktop (Windows 64-bit, Ubuntu 64-bit, Mac 64-bit)
+=============================================================================================
 
 * Install Qt (to the default location).
 
@@ -59,3 +59,12 @@ Finally, then you need to install the udev rules yourself:
      sudo cp openmv-ide/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/
      sudo udevadm trigger
      sudo udevadm control --reload-rules
+
+Mac
+---
+
+The installer is a DMG with the app inside of it:
+
+     hdiutil attach openmv-ide-linux-mac-*.dmg
+     sudo cp -rf /Volumes/OpenMV\ IDE/OpenMV\ IDE.app /Applications
+     sudo hdiutil detach /Volumes/OpenMV\ IDE
