@@ -59,7 +59,7 @@ jobs:
         target: 'desktop'
         arch: 'win64_mingw'
         dir: 'C:\Users\runneradmin'
-        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat'
         cache: true
         tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
 
@@ -73,7 +73,7 @@ jobs:
         target: 'desktop'
         arch: 'gcc_64'
         dir: '/home/runner'
-        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat'
         cache: true
         tools: 'tools_cmake tools_ifw tools_ninja'
 
@@ -87,7 +87,7 @@ jobs:
         target: 'desktop'
         arch: 'clang_64'
         dir: '/Users/runner'
-        modules: 'qtimageformats qtmultimedia qtserialbus qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat'
         cache: true
         tools: 'tools_cmake tools_ninja'
 
