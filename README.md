@@ -1,7 +1,7 @@
 [![IDE Build 🔥](https://github.com/openmv/openmv-ide/actions/workflows/main.yml/badge.svg)](https://github.com/openmv/openmv-ide/actions/workflows/main.yml)
 [![GitHub license](https://img.shields.io/github/license/openmv/openmv-ide?label=license%20%E2%9A%96)](https://github.com/openmv/openmv-ide/blob/master/LICENSE)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/openmv/openmv-ide?sort=semver)
-[![GitHub forks](https://img.shields.io/github/forks/openmv/openmv-ide?color=green)](https://github.com/openmv/openm-vide/network)
+[![GitHub forks](https://img.shields.io/github/forks/openmv/openmv-ide?color=green)](https://github.com/openmv/openmv-ide/network)
 [![GitHub stars](https://img.shields.io/github/stars/openmv/openmv-ide?color=yellow)](https://github.com/openmv/openmv-ide/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/openmv/openmv-ide?color=orange)](https://github.com/openmv/openmv-ide/issues)
 
