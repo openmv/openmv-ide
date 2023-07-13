@@ -14,9 +14,9 @@ jobs:
     runs-on: ${{ matrix.map.os }}
     strategy:
       matrix:
-        map: [{os: windows-latest, host: windows},
-              {os: ubuntu-latest, host: linux},
-              {os: macos-latest, host: mac}]
+        map: [{os: windows-latest, host: windows, suffix: exe},
+              {os: ubuntu-latest, host: linux, suffix: run},
+              {os: macos-latest, host: mac, suffix: dmg}]
       fail-fast: false
     steps:
     - name: '⏳ Checkout repository'
@@ -93,11 +93,7 @@ jobs:
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows'
-      run: |
-        python make.py
-        version=$(ls build | grep -oP 'openmv-ide-windows-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.exe)')
-        cd build
-        zip openmv-ide-windows-${version}.zip openmv-ide-windows-${version}.exe
+      run: run: python make.py
 
     - name: '🏗 Build IDE on Linux'
       if: matrix.map.host == 'linux'
@@ -107,25 +103,23 @@ jobs:
         version=$(ls build | grep -oP 'openmv-ide-linux-x86_64-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.run)')
         cd qt-creator/share/qtcreator
         zip -r ../../../build/openmv-ide-resources-${version}.zip examples firmware html models
-        cd ../../../build
-        zip openmv-ide-linux-x86_64-${version}.zip openmv-ide-linux-x86_64-${version}.run
 
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac'
       run: python make.py
 
     - name: '⬆ Upload artifacts'
-      if: github.event_name != 'pull_request' && matrix.map.host != 'mac'
+      if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@v3
       with:
-        path: 'build/openmv-ide-*.zip'
+        path: 'build/openmv-ide-*.${{ matrix.map.suffix }}'
         if-no-files-found: error
   
     - name: '⬆ Upload resources'
-      if: github.event_name != 'pull_request' && matrix.map.host == 'mac'
+      if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
       uses: actions/upload-artifact@v3
       with:
-        path: 'build/openmv-ide-*.dmg'
+        path: 'build/openmv-ide-*.zip'
         if-no-files-found: error
 
     - name: '🍏 Remove Apple Certificates'
