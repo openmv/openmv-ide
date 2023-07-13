@@ -93,7 +93,7 @@ jobs:
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows'
-      run: run: python make.py
+      run: python make.py
 
     - name: '🏗 Build IDE on Linux'
       if: matrix.map.host == 'linux'
