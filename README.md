@@ -67,6 +67,7 @@ Note: `libxcb-xinerama0` may be required for the installer to run.
 And then you will need to manually install required libraries for yourself (e.g. for Ubuntu):
 
      sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip
+     sduo pip install pyusb
 
 And **potentially** required libraries (e.g. for Ubuntu):
 
