@@ -271,7 +271,7 @@ def find_windowssdkdir():
 def get_ideversion(folder):
     for line in reversed(list(open(os.path.join(folder, "qt-creator/cmake/QtCreatorIDEBranding.cmake")))):
         match = re.search(r'set\(IDE_VERSION\s+"([^"]+)"\)', line)
-        if match:  return match.group(1)
+        if match: return match.group(1)
 
 def make():
 
@@ -281,7 +281,7 @@ def make():
     "Make Script")
 
     parser.add_argument("--rpi", nargs = '?',
-    help = "Cross Compile QTDIR for the Raspberry Pi")
+    help = "Qt 6 Cross-Compile QTDIR for the Raspberry Pi")
 
     args = parser.parse_args()
 
@@ -313,45 +313,22 @@ def make():
     installer = ""
 
     if args.rpi:
-        # Add Fonts...
-        if os.path.exists(os.path.join(installdir, "lib/Qt/lib/fonts")):
-            shutil.rmtree(os.path.join(installdir, "lib/Qt/lib/fonts"), ignore_errors = True)
-        shutil.copytree(os.path.join(__folder__, "dejavu-fonts/fonts/"),
-                        os.path.join(installdir, "lib/Qt/lib/fonts"))
-        # Add README.txt...
         with open(os.path.join(installdir, "README.txt"), 'w') as f:
-            f.write("Please run setup.sh to install OpenMV IDE dependencies... e.g.\n\n")
-            f.write("./setup.sh\n\n")
-            f.write("source ~/.profile\n\n")
-            f.write("./bin/openmvide\n\n")
-        # Add setup.sh...
+            f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
+            f.write("    ./setup.sh\n\n")
+            f.write("And then run OpenMV IDE:\n\n")
+            f.write("    ./bin/openmvide\n")
         with open(os.path.join(installdir, "setup.sh"), 'w') as f:
             f.write("#! /bin/sh\n\n")
-            f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n")
-            f.write("sudo apt-get install -y ibxcb* libGLES* libts* libsqlite* libodbc* libsybdb* libusb-1.0 python-pip libgles2-mesa-dev libpng12-dev qt5-default libts-dev\n")
+            f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
+            f.write("sudo apt-get update -y\n")
+            f.write("sudo apt-get full-upgrade -y\n")
+            f.write("sudo apt-get install -y libboost-all-dev libudev-dev libinput-dev libts-dev libmtdev-dev libjpeg-dev libfontconfig1-dev libssl-dev libdbus-1-dev libglib2.0-dev libxkbcommon-dev libegl1-mesa-dev libgbm-dev libgles2-mesa-dev mesa-common-dev libasound2-dev libpulse-dev gstreamer1.0-omx libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev  gstreamer1.0-alsa libvpx-dev libsrtp2-dev libsnappy-dev libnss3-dev \"^libxcb.*\" flex bison libxslt-dev ruby gperf libbz2-dev libcups2-dev libatkmm-1.6-dev libxi6 libxcomposite1 libfreetype6-dev libicu-dev libsqlite3-dev libxslt1-dev libavcodec-dev libavformat-dev libswscale-dev libx11-dev freetds-dev libsqlite3-dev libpq-dev libiodbc2-dev firebird-dev libgst-dev libxext-dev libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync1 libxcb-sync-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-glx0-dev libxi-dev libdrm-dev libxcb-xinerama0 libxcb-xinerama0-dev libatspi2.0-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxss-dev libxtst-dev libpci-dev libcap-dev libxrandr-dev libdirectfb-dev libaudio-dev libxkbcommon-x11-dev\n\n")
+            f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip\n")
             f.write("sudo pip install pyusb\n\n")
-            f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/50-openmv.rules /etc/udev/rules.d/50-openmv.rules\n")
+            f.write("sudo cp $( dirname \"$0\" )/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/\n")
+            f.write("sudo udevadm trigger\n")
             f.write("sudo udevadm control --reload-rules\n\n")
-            f.write("if [ -z \"${QT_QPA_PLATFORM}\" ]; then\n")
-            f.write("    echo >> ~/.profile\n")
-            f.write("    echo \"# Force Qt Apps to use xcb\" >> ~/.profile\n")
-            f.write("    echo \"export QT_QPA_PLATFORM=xcb\" >> ~/.profile\n")
-            f.write("    echo\n")
-            f.write("    echo Please type \"source ~/.profile\".\n")
-            f.write("fi\n\n")
-            f.write("# Make sure hard linked libts library is there\n\n")
-            f.write("LINK=/usr/lib/arm-linux-gnueabihf/libts-0.0.so.0\n")
-            f.write("if [ ! -e ${LINK} ]\n")
-            f.write("then\n")
-            f.write("    TSLIB=`find /usr/lib/arm-linux-gnueabihf/ -type f -name libts.so*`\n")
-            f.write("    if [ ! -z ${TSLIB} ]\n")
-            f.write("    then\n")
-            f.write("        sudo ln -s ${TSLIB} ${LINK}\n")
-            f.write("    else\n")
-            f.write("        echo \"Could not find libts library\"\n")
-            f.write("        exit 1\n")
-            f.write("    fi\n")
-            f.write("fi\n\n")
             f.write("while true; do\n")
             f.write("    read -r -p \"\nInstall Desktop Shortcut? [y/n] \" _response\n")
             f.write("    case \"$_response\" in\n")
@@ -359,14 +336,16 @@ def make():
             f.write("            cat > /home/$USER/Desktop/openmvide.desktop << EOM\n")
             f.write("[Desktop Entry]\n")
             f.write("Type=Application\n")
-            f.write("Comment=The IDE of choice for OpenMV Cam Development.\n")
-            f.write("Name=OpenMV IDE\n")
             f.write("Exec=$DIR/bin/openmvide\n")
+            f.write("Path=$DIR\n")
+            f.write("Name=OpenMV IDE\n")
+            f.write("GenericName=The IDE of choice for OpenMV Cam Development.\n")
+            f.write("X-KDE-StartupNotify=true\n")
             f.write("Icon=$DIR/share/icons/hicolor/512x512/apps/OpenMV-openmvide.png\n")
+            f.write("StartupWMClass=openmvide\n")
             f.write("Terminal=false\n")
-            f.write("StartupNotify=true\n")
-            f.write("Categories=Development\n")
-            f.write("MimeType=text/x-python\n")
+            f.write("Categories=Development;IDE;OpenMV;\n")
+            f.write("MimeType=text/x-python;\n")
             f.write("EOM\n")
             f.write("            echo \"You must logout and login again for the desktop shortcut to work.\"\n")
             f.write("            exit 0\n")
@@ -377,16 +356,25 @@ def make():
             f.write("        *)\n")
             f.write("            ;;\n")
             f.write("    esac\n")
-            f.write("done\n\n")
+            f.write("done\n")
         os.chmod(os.path.join(installdir, "setup.sh"),
             os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        # Build...
+        installer_name = "openmv-ide-linux-arm-" + ideversion + ".tar.gz"
         if os.system("cd " + builddir +
-        " && qmake ../qt-creator/qtcreator.pro -r" +
-        " && make -r -w -j" + str(cpus) +
-        " && make bindist INSTALL_ROOT="+installdir):
+        " && cmake ../qt-creator" +
+            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+            " \"-DCMAKE_C_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-gcc-9\"" +
+            " \"-DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-g++-9\"" +
+            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
+            " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
+        " && cmake --build . --target all" +
+        " && cmake --install . --prefix install" +
+        " && cmake --install . --prefix install --component Dependencies" +
+        " && cp -r install openmv-ide" +  
+        " && tar -czvf " + installer_name + " openmv-ide"):
             sys.exit("Make Failed...")
-        installer = glob.glob(os.path.join(builddir, "openmv-ide-*.tar.gz"))[0]
 
     elif sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
