@@ -138,15 +138,10 @@ jobs:
         sudo apt-get install -y gcc-aarch64-linux-gnu
         sudo apt-get install -y g++-aarch64-linux-gnu
         sudo apt-get install -y libclang-11-dev
+        sudo cp cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
         cd ~
-        wget https://github.com/openmv/qt-raspi/releases/download/development/qt-host.tar.gz
-        tar -xzvf qt-host.tar.gz
         wget https://github.com/openmv/qt-raspi/releases/download/development/qt-raspi.tar.gz
         tar -xzvf qt-raspi.tar.gz
-        wget https://github.com/openmv/qt-raspi/raw/main/rpi-sysroot.tar.gz
-        tar -xzvf rpi-sysroot.tar.gz
-        wget https://raw.githubusercontent.com/openmv/qt-raspi/main/toolchain.cmake
-        sudo cp work/openmv-ide/openmv-ide/cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows'
