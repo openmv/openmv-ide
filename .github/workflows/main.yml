@@ -144,7 +144,7 @@ jobs:
         wget https://github.com/openmv/qt-raspi/releases/download/development/qt-raspi.tar.gz
         tar -xzvf qt-raspi.tar.gz
         wget https://github.com/openmv/qt-raspi/blob/main/toolchain.cmake
-        sudo cp work/openmv-ide/cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
+        sudo cp work/openmv-ide/openmv-ide/cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows'
