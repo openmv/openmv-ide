@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         map: [{os: windows-2019, host: windows, suffix: exe},
-              {os: ubuntu-22.04, host: linux, suffix: run},
+              {os: ubuntu-20.04, host: linux, suffix: run},
               {os: macos-11, host: mac, suffix: dmg}]
       fail-fast: false
     steps:
