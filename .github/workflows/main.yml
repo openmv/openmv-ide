@@ -16,7 +16,8 @@ jobs:
       matrix:
         map: [{os: windows-2019, host: windows, suffix: exe},
               {os: ubuntu-20.04, host: linux, suffix: run},
-              {os: macos-11, host: mac, suffix: dmg}]
+              {os: macos-11, host: mac, suffix: dmg},
+              {os: ubuntu-20.04, host: linux-rpi, suffix: tar.gz}]
       fail-fast: false
     steps:
     - name: '⏳ Checkout repository'
@@ -91,6 +92,59 @@ jobs:
         cache: true
         tools: 'tools_cmake tools_ninja'
 
+    - name: '⬇ Install Qt Cross-Compile for Raspberry Pi'
+      if: matrix.map.host == 'linux-rpi'
+      run: |
+        sudo apt update -y
+        sudo apt upgrade -y
+        sudo apt-get install -y make
+        sudo apt-get install -y build-essential
+        sudo apt-get install -y libclang-dev
+        sudo apt-get install -y ninja-build
+        sudo apt-get install -y gcc
+        sudo apt-get install -y git
+        sudo apt-get install -y bison
+        sudo apt-get install -y python3
+        sudo apt-get install -y gperf
+        sudo apt-get install -y pkg-config
+        sudo apt-get install -y libfontconfig1-dev
+        sudo apt-get install -y libfreetype6-dev
+        sudo apt-get install -y libx11-dev
+        sudo apt-get install -y libx11-xcb-dev
+        sudo apt-get install -y libxext-dev
+        sudo apt-get install -y libxfixes-dev
+        sudo apt-get install -y libxi-dev
+        sudo apt-get install -y libxrender-dev
+        sudo apt-get install -y libxcb1-dev
+        sudo apt-get install -y libxcb-glx0-dev
+        sudo apt-get install -y libxcb-keysyms1-dev
+        sudo apt-get install -y libxcb-image0-dev
+        sudo apt-get install -y libxcb-shm0-dev
+        sudo apt-get install -y libxcb-icccm4-dev
+        sudo apt-get install -y libxcb-sync-dev
+        sudo apt-get install -y libxcb-xfixes0-dev
+        sudo apt-get install -y libxcb-shape0-dev
+        sudo apt-get install -y libxcb-randr0-dev
+        sudo apt-get install -y libxcb-render-util0-dev
+        sudo apt-get install -y libxcb-util-dev
+        sudo apt-get install -y libxcb-xinerama0-dev
+        sudo apt-get install -y libxcb-xkb-dev
+        sudo apt-get install -y libxkbcommon-dev
+        sudo apt-get install -y libxkbcommon-x11-dev
+        sudo apt-get install -y libatspi2.0-dev
+        sudo apt-get install -y libgl1-mesa-dev
+        sudo apt-get install -y libglu1-mesa-dev
+        sudo apt-get install -y freeglut3-dev
+        sudo apt-get install -y gcc-aarch64-linux-gnu
+        sudo apt-get install -y g++-aarch64-linux-gnu
+        sudo apt-get install -y libclang-11-dev
+        cd ~
+        wget https://github.com/openmv/qt-raspi/releases/download/development/qt-host.tar.gz
+        tar -xzvf qt-host.tar.gz
+        wget https://github.com/openmv/qt-raspi/releases/download/development/qt-raspi.tar.gz
+        tar -xzvf qt-raspi.tar.gz
+        ls ~
+
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows'
       run: python make.py
@@ -107,6 +161,10 @@ jobs:
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac'
       run: python make.py
+
+    - name: '🏗 Build IDE on Linux for Raspberry Pi'
+      if: matrix.map.host == 'linux-rpi'
+      run: python make.py --rpi ~/qt-raspi
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
