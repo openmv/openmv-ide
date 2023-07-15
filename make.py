@@ -2,7 +2,7 @@
 
 # by: Kwabena W. Agyeman - kwagyeman@openmv.io
 
-import argparse, glob, multiprocessing, os, re, shutil, stat, sys
+import argparse, os, re, stat, sys
 
 def match(d0, d1):
     x = [x for x in os.listdir(d0) if re.match(d1, x)]
@@ -290,14 +290,12 @@ def make():
 
     ###########################################################################
 
-    cpus = multiprocessing.cpu_count()
-
     qtdir = find_qtdir(args.rpi)
     mingwdir = find_mingwdir()
-    cmakedir = find_cmakedir()
-    ninjadir = find_ninjadir()
+    find_cmakedir()
+    find_ninjadir()
     ifdir = find_ifdir()
-    windowssdk = find_windowssdkdir()
+    find_windowssdkdir()
 
     ideversion = get_ideversion(__folder__)
 
@@ -309,8 +307,6 @@ def make():
 
     if not os.path.exists(installdir):
         os.mkdir(installdir)
-
-    installer = ""
 
     if args.rpi:
         with open(os.path.join(installdir, "README.txt"), 'w') as f:
@@ -372,7 +368,7 @@ def make():
         " && cmake --build . --target all" +
         " && cmake --install . --prefix install" +
         " && cmake --install . --prefix install --component Dependencies" +
-        " && cp -r install openmv-ide" +  
+        " && cp -r install openmv-ide" +
         " && tar -czvf " + installer_name + " openmv-ide"):
             sys.exit("Make Failed...")
 
