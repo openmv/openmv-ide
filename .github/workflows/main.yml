@@ -1,4 +1,4 @@
-name: '🔥 IDE Build'
+name: 'CI'
 
 on:
   push:
