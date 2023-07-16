@@ -16,6 +16,7 @@
     + [Windows](#windows)
     + [Linux](#linux)
     + [Mac](#mac)
+    + [RaspberryPi](#raspberrypi)
   - [Contributing to the project](#contributing-to-the-project)
     + [Contribution guidelines](#contribution-guidelines)
 
@@ -25,9 +26,7 @@ OpenMV IDE is a cross platform integrated development enviornment for writing py
 
 ## Compiling OpenMV IDE for Windows, Linux, and Mac
 
-* Install Qt (to the default location).
-
-In `/`, build the ide (using the standard bare terminal):
+Install Qt (to the default location) and then:
 
      git clone --recursive https://github.com/openmv/openmv-ide.git
      cd openmv-ide
@@ -37,14 +36,37 @@ You'll find the installer in `build`.
 
 ## Compiling OpenMV IDE for RaspberryPi on Linux
 
-* Install QtRpi.
-* Install Qt (to the default location).
+**This guide works for compiling on a `ubuntu-20.04` machine only.**
 
-In `/`, build the ide (using the standard bare terminal):
+First, you need to setup your machine:
+
+     sudo apt update
+     sudo apt upgrade
+
+Next you need to download a bunch of packages required for the gui:
+
+     sudo apt-get install make build-essential libclang-dev ninja-build gcc git bison python3 gperf pkg-config libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev libatspi2.0-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev
+
+Aftwards, you need to install the cross-compilier. Please note that by using `ubuntu-20.04` this command should install version 9 of the cross-compilier. Using a newer version of the operating system will result in a newer version of the cross-compilier which will cause linker mismatch issues between the host system and the RaspberryPi:
+
+     sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+Finally, the cmake build system for OpenMV IDE requires libclang to be available on the build system (though it's not used by the IDE):
+
+     sudo apt install libclang-11-dev
+
+Now it's time to install [Qt Cross-Compiled for the RaspberryPi](https://github.com/openmv/qt-raspi). Please note that this must be installed in your home directory with the username `runner` (e.g. `/home/runner`) as the cross-compile hardcodes its path when it's built:
+
+     cd /home/runner
+     wget https://github.com/openmv/qt-raspi/releases/download/development/qt-raspi.tar.gz
+     tar -xzvf qt-raspi.tar.gz
+
+Now we can build the IDE. Please note that you need to install the `cross-compile-ldd` tool before you build as you can see in the snippet below:
 
      git clone --recursive https://github.com/openmv/openmv-ide.git
      cd openmv-ide
-     ./make.py --rpi <path-to-qtrpi-installdir e.g. /opt/qtrpi/raspi/qt5>
+     sudo cp cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
+     ./make.py --rpi /home/runner
 
 You'll find the installer in `build`.
 
@@ -81,11 +103,19 @@ Finally, you need to install the udev rules yourself:
 
 ### Mac
 
-The installer is a DMG with the app inside of it.
+The installer is a DMG with the app inside of it:
 
-     hdiutil attach openmv-ide-linux-mac-*.dmg
+     hdiutil attach openmv-ide-mac-*.dmg
      sudo cp -rf /Volumes/OpenMV\ IDE/OpenMV\ IDE.app /Applications
      sudo hdiutil detach /Volumes/OpenMV\ IDE
+
+### RaspberryPi
+
+The installer is a tar file with a setup script:
+
+     tar -xzvf openmv-ide-linux-arm-*.tar.gz
+     cd openmv-ide
+     ./setup.sh
 
 ## Contributing to the project
 
