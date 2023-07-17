@@ -113,7 +113,7 @@ The installer is a DMG with the app inside of it:
 
 The installer is a tar file with a setup script:
 
-     tar -xzvf openmv-ide-linux-arm-*.tar.gz
+     tar -xzvf openmv-ide-linux-arm64-*.tar.gz
      cd openmv-ide
      ./setup.sh
 
