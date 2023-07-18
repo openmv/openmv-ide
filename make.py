@@ -301,6 +301,7 @@ def make():
 
     builddir = os.path.join(__folder__, "build")
     installdir = os.path.join(builddir, "install")
+    if args.rpi: installdir = os.path.join(builddir, "openmv-ide")
 
     if not os.path.exists(builddir):
         os.mkdir(builddir)
@@ -349,7 +350,7 @@ def make():
             os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
         if os.system("cd " + builddir +
-        " && cmake ../qt-creator" +
+        " && cmake ../qt-creator -Wno-dev" +
             " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
             " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
             " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
@@ -358,9 +359,8 @@ def make():
             " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
             " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
         " && cmake --build . --target all" +
-        " && cmake --install . --prefix install" +
-        " && cmake --install . --prefix install --component Dependencies" +
-        " && cp -r install openmv-ide" +
+        " && cmake --install . --prefix openmv-ide" +
+        " && cmake --install . --prefix openmv-ide --component Dependencies" +
         " && tar -czvf " + installer_name + " openmv-ide"):
             sys.exit("Make Failed...")
 
