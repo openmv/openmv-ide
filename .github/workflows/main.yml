@@ -142,7 +142,7 @@ jobs:
         sudo apt-get install -y libclang-11-dev
         sudo cp cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
         cd ~
-        wget https://github.com/openmv/qt-raspi/releases/download/development/qt-raspi.tar.gz
+        wget https://github.com/openmv/qt-raspi/releases/download/v6.5.1/qt-raspi.tar.gz
         tar -xzvf qt-raspi.tar.gz
 
     - name: '🏗 Build IDE on Windows'
