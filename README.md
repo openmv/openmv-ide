@@ -58,7 +58,7 @@ Finally, the cmake build system for OpenMV IDE requires libclang to be available
 Now it's time to install [Qt Cross-Compiled for the RaspberryPi](https://github.com/openmv/qt-raspi). Please note that this must be installed in your home directory with the username `runner` (e.g. `/home/runner`) as the cross-compile hardcodes its path when it's built:
 
      cd /home/runner
-     wget https://github.com/openmv/qt-raspi/releases/download/development/qt-raspi.tar.gz
+     wget https://github.com/openmv/qt-raspi/releases/download/v6.5.1/qt-raspi.tar.gz
      tar -xzvf qt-raspi.tar.gz
 
 Now we can build the IDE. Please note that you need to install the `cross-compile-ldd` tool before you build as you can see in the snippet below:
@@ -66,7 +66,7 @@ Now we can build the IDE. Please note that you need to install the `cross-compil
      git clone --recursive https://github.com/openmv/openmv-ide.git
      cd openmv-ide
      sudo cp cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
-     ./make.py --rpi /home/runner
+     ./make.py --rpi /home/runner/qt-raspi
 
 You'll find the installer in `build`.
 
@@ -85,21 +85,8 @@ The installer will need administrator privileges which it should ask for when ru
 Note: `libxcb-xinerama0` may be required for the installer to run.
 
      ./openmv-ide-linux-x86_64-*.run --al --am -c in
-
-And then you will need to manually install required libraries for yourself (e.g. for Ubuntu):
-
-     sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip
-     sduo pip install pyusb
-
-And **potentially** required libraries (e.g. for Ubuntu):
-
-     sudo apt-get install -y libfontconfig1 libfreetype6 libxcb1 libxcb-glx0 libxcb-keysyms1 libxcb-image0 libxcb-shm0 libxcb-icccm4 libxcb-xfixes0 libxcb-shape0 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0
-
-Finally, you need to install the udev rules yourself:
-
-     sudo cp openmv-ide/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/
-     sudo udevadm trigger
-     sudo udevadm control --reload-rules
+     cd <openmv-ide-install-dir>
+     ./setup.sh
 
 ### Mac
 
