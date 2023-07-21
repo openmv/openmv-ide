@@ -12,6 +12,7 @@
   - [Overview](#overview)
   - [Compiling OpenMV IDE for Windows, Linux, and Mac](#compiling-openmv-ide-for-windows-linux-and-mac)
   - [Compiling OpenMV IDE for RaspberryPi on Linux](#compiling-openmv-ide-for-raspberrypi-on-linux)
+  - [Command Line Options](#command-line-options)
   - [Instructions for running the installer silently](#instructions-for-running-the-installer-silently)
     + [Windows](#windows)
     + [Linux](#linux)
@@ -69,6 +70,10 @@ Now we can build the IDE. Please note that you need to install the `cross-compil
      ./make.py --rpi /home/runner/qt-raspi
 
 You'll find the installer in `build`.
+
+## Command Line Options
+
+Did you know that OpenMV IDE features command line options which allow you to automate connecting to your OpenMV Cam, updating its firmware, running scripts, and more? Pass `-h` or `--help` to OpenMV IDE on the command line to see what you can make the IDE automatically do! 
 
 ## Instructions for running the installer silently
 
