@@ -283,6 +283,18 @@ def make():
     parser.add_argument("--rpi", nargs = '?',
     help = "Qt 6 Cross-Compile QTDIR for the Raspberry Pi")
 
+    parser.add_argument("--build_application", action='store_true', default=True,
+    help = "Build the application")
+
+    parser.add_argument("--sign_application", action='store_true', default=True,
+    help = "Sign the application on windows and mac")
+
+    parser.add_argument("--build_installer", action='store_true', default=True,
+    help = "Build the installer")
+
+    parser.add_argument("--sign_installer", action='store_true', default=True,
+    help = "Sign the installer on windows and mac")
+
     args = parser.parse_args()
 
     if args.rpi and not sys.platform.startswith('linux'):
@@ -310,125 +322,153 @@ def make():
         os.mkdir(installdir)
 
     if args.rpi:
-        with open(os.path.join(installdir, "README.txt"), 'w') as f:
-            f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
-            f.write("    ./setup.sh\n\n")
-            f.write("And then run OpenMV IDE:\n\n")
-            f.write("    ./bin/openmvide\n")
-        with open(os.path.join(installdir, "setup.sh"), 'w') as f:
-            f.write("#! /bin/sh\n\n")
-            f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
-            f.write("sudo apt-get update -y\n")
-            f.write("sudo apt-get full-upgrade -y\n")
-            f.write("sudo apt-get install -y libboost-all-dev libudev-dev libinput-dev libts-dev libmtdev-dev libjpeg-dev libfontconfig1-dev libssl-dev libdbus-1-dev libglib2.0-dev libxkbcommon-dev libegl1-mesa-dev libgbm-dev libgles2-mesa-dev mesa-common-dev libasound2-dev libpulse-dev gstreamer1.0-omx libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev  gstreamer1.0-alsa libvpx-dev libsrtp2-dev libsnappy-dev libnss3-dev \"^libxcb.*\" flex bison libxslt-dev ruby gperf libbz2-dev libcups2-dev libatkmm-1.6-dev libxi6 libxcomposite1 libfreetype6-dev libicu-dev libsqlite3-dev libxslt1-dev libavcodec-dev libavformat-dev libswscale-dev libx11-dev freetds-dev libsqlite3-dev libpq-dev libiodbc2-dev firebird-dev libgst-dev libxext-dev libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync1 libxcb-sync-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-glx0-dev libxi-dev libdrm-dev libxcb-xinerama0 libxcb-xinerama0-dev libatspi2.0-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxss-dev libxtst-dev libpci-dev libcap-dev libxrandr-dev libdirectfb-dev libaudio-dev libxkbcommon-x11-dev\n\n")
-            f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip\n")
-            f.write("sudo pip install pyusb\n\n")
-            f.write("sudo cp $DIR/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/\n")
-            f.write("sudo udevadm trigger\n")
-            f.write("sudo udevadm control --reload-rules\n\n")
-            f.write("cp -r \"$DIR/share/icons\" \"/home/$USER/.local/share/icons\"\n")
-            f.write("sudo cp -r \"$DIR/share/icons\" /usr/share/\n")
-            f.write("rm -rf \"$DIR/share/icons\"\n")
-            f.write("sudo gtk-update-icon-cache\n\n")
-            f.write("cat > \"/home/$USER/Desktop/openmvide.desktop\" << EOM\n")
-            f.write("[Desktop Entry]\n")
-            f.write("Type=Application\n")
-            f.write("Name=OpenMV IDE\n")
-            f.write("GenericName=OpenMV IDE\n")
-            f.write("Comment=The IDE of choice for OpenMV Cam Development.\n")
-            f.write("Exec=\"$DIR/bin/openmvide\" %F\n")
-            f.write("Icon=OpenMV-openmvide\n")
-            f.write("Terminal=false\n")
-            f.write("Categories=Development;IDE;Electronics;OpenMV;\n")
-            f.write("MimeType=text/x-python;\n")
-            f.write("Keywords=embedded electronics;electronics;microcontroller;micropython;computer vision;machine vision;\n")
-            f.write("StartupWMClass=openmvide\n")
-            f.write("EOM\n")
-            f.write("cp \"/home/$USER/Desktop/openmvide.desktop\"  \"/home/$USER/.local/share/applications/\"\n")
-            f.write("sudo cp \"/home/$USER/Desktop/openmvide.desktop\" /usr/share/applications/\n")
-        os.chmod(os.path.join(installdir, "setup.sh"),
-            os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
-        if os.system("cd " + builddir +
-        " && cmake ../qt-creator -Wno-dev" +
-            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
-            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
-            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-            " \"-DCMAKE_C_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-gcc-9\"" +
-            " \"-DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-g++-9\"" +
-            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
-            " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
-        " && cmake --build . --target all" +
-        " && cmake --install . --prefix openmv-ide" +
-        " && cmake --install . --prefix openmv-ide --component Dependencies" +
-        " && tar -czvf " + installer_name + " openmv-ide"):
-            sys.exit("Make Failed...")
+        if args.build_application:
+            if os.system("cd " + builddir +
+            " && cmake ../qt-creator -Wno-dev" +
+                " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+                " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+                " \"-DCMAKE_C_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-gcc-9\"" +
+                " \"-DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-g++-9\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
+                " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
+            " && cmake --build . --target all" +
+            " && cmake --install . --prefix openmv-ide" +
+            " && cmake --install . --prefix openmv-ide --component Dependencies"):
+                sys.exit("Make Failed...")
+        if args.build_installer:
+            with open(os.path.join(installdir, "README.txt"), 'w') as f:
+                f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
+                f.write("    ./setup.sh\n\n")
+                f.write("And then run OpenMV IDE:\n\n")
+                f.write("    ./bin/openmvide\n")
+            with open(os.path.join(installdir, "setup.sh"), 'w') as f:
+                f.write("#! /bin/sh\n\n")
+                f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
+                f.write("sudo apt-get update -y\n")
+                f.write("sudo apt-get full-upgrade -y\n")
+                f.write("sudo apt-get install -y libboost-all-dev libudev-dev libinput-dev libts-dev libmtdev-dev libjpeg-dev libfontconfig1-dev libssl-dev libdbus-1-dev libglib2.0-dev libxkbcommon-dev libegl1-mesa-dev libgbm-dev libgles2-mesa-dev mesa-common-dev libasound2-dev libpulse-dev gstreamer1.0-omx libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev  gstreamer1.0-alsa libvpx-dev libsrtp2-dev libsnappy-dev libnss3-dev \"^libxcb.*\" flex bison libxslt-dev ruby gperf libbz2-dev libcups2-dev libatkmm-1.6-dev libxi6 libxcomposite1 libfreetype6-dev libicu-dev libsqlite3-dev libxslt1-dev libavcodec-dev libavformat-dev libswscale-dev libx11-dev freetds-dev libsqlite3-dev libpq-dev libiodbc2-dev firebird-dev libgst-dev libxext-dev libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync1 libxcb-sync-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-glx0-dev libxi-dev libdrm-dev libxcb-xinerama0 libxcb-xinerama0-dev libatspi2.0-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxss-dev libxtst-dev libpci-dev libcap-dev libxrandr-dev libdirectfb-dev libaudio-dev libxkbcommon-x11-dev\n\n")
+                f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip\n")
+                f.write("sudo pip install pyusb\n\n")
+                f.write("sudo cp $DIR/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/\n")
+                f.write("sudo udevadm trigger\n")
+                f.write("sudo udevadm control --reload-rules\n\n")
+                f.write("cp -r \"$DIR/share/icons\" \"/home/$USER/.local/share/icons\"\n")
+                f.write("sudo cp -r \"$DIR/share/icons\" /usr/share/\n")
+                f.write("rm -rf \"$DIR/share/icons\"\n")
+                f.write("sudo gtk-update-icon-cache\n\n")
+                f.write("cat > \"/home/$USER/Desktop/openmvide.desktop\" << EOM\n")
+                f.write("[Desktop Entry]\n")
+                f.write("Type=Application\n")
+                f.write("Name=OpenMV IDE\n")
+                f.write("GenericName=OpenMV IDE\n")
+                f.write("Comment=The IDE of choice for OpenMV Cam Development.\n")
+                f.write("Exec=\"$DIR/bin/openmvide\" %F\n")
+                f.write("Icon=OpenMV-openmvide\n")
+                f.write("Terminal=false\n")
+                f.write("Categories=Development;IDE;Electronics;OpenMV;\n")
+                f.write("MimeType=text/x-python;\n")
+                f.write("Keywords=embedded electronics;electronics;microcontroller;micropython;computer vision;machine vision;\n")
+                f.write("StartupWMClass=openmvide\n")
+                f.write("EOM\n")
+                f.write("cp \"/home/$USER/Desktop/openmvide.desktop\"  \"/home/$USER/.local/share/applications/\"\n")
+                f.write("sudo cp \"/home/$USER/Desktop/openmvide.desktop\" /usr/share/applications/\n")
+            os.chmod(os.path.join(installdir, "setup.sh"),
+                os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            if os.system("cd " + builddir +
+            " && tar -czvf " + installer_name + " openmv-ide"):
+                sys.exit("Make Failed...")
 
     elif sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
         installer_archive_name = installer_name + "-installer-archive.7z"
-        if os.system("cd " + builddir +
-        " && cmake ../qt-creator" +
-            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
-            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
-            " \"-DQT_QMAKE_EXECUTABLE:FILEPATH=" + os.path.join(qtdir, "bin/qmake.exe") + "\"" +
-            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-            " \"-DCMAKE_C_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/gcc.exe") + "\"" +
-            " \"-DCMAKE_CXX_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/g++.exe") + "\"" +
-            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
-        " && cmake --build . --target all" +
-        " && cmake --install . --prefix install" +
-        " && cmake --install . --prefix install --component Dependencies" +
-        " && python -u ../qt-creator/scripts/sign.py install" +
-        " && cd install"
-        " && archivegen ../" + installer_archive_name + " bin lib share" +
-        " && cd .."
-        " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
+        if args.build_application:
+            if os.system("cd " + builddir +
+            " && cmake ../qt-creator" +
+                " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+                " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DQT_QMAKE_EXECUTABLE:FILEPATH=" + os.path.join(qtdir, "bin/qmake.exe") + "\"" +
+                " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+                " \"-DCMAKE_C_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/gcc.exe") + "\"" +
+                " \"-DCMAKE_CXX_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/g++.exe") + "\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
+            " && cmake --build . --target all" +
+            " && cmake --install . --prefix install" +
+            " && cmake --install . --prefix install --component Dependencies"):
+                sys.exit("Make Failed...")
+        if args.sign_application:
+            if os.system("cd " + builddir +
+            " && python -u ../qt-creator/scripts/sign.py install"):
+                sys.exit("Make Failed...")
+        if args.build_installer:
+            if os.system("cd " + builddir +
+            " && cd install" +
+            " && archivegen ../" + installer_archive_name + " bin lib share" +
+            " && cd .."
+            " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion +
-            " -a " + installer_archive_name + " " + installer_name +
-        " && python3 -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
-            sys.exit("Make Failed...")
+            " -a " + installer_archive_name + " " + installer_name):
+                sys.exit("Make Failed...")
+        if args.sign_installer:
+            if os.system("cd " + builddir +
+            " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
+                sys.exit("Make Failed...")
 
     elif sys.platform.startswith('darwin'):
         installer_name = "openmv-ide-mac-" + ideversion + ".dmg"
-        if os.system("cd " + builddir +
-        " && cmake ../qt-creator" +
-            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
-            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
-            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
-        " && cmake --build . --target all" +
-        " && cmake --install . --prefix . --component Dependencies" +
-        " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
-        " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true" +
-        " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
-        " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait || true" +
-        " && xcrun stapler staple OpenMV\\ IDE.app || true" +
-        " && ../qt-creator/scripts/makedmg.sh OpenMV\\ IDE.app " + installer_name +
-        " && xcrun notarytool submit " + installer_name + " --keychain-profile \"AC_PASSWORD\" --wait || true" +
-        " && xcrun stapler staple " + installer_name + " || true"):
-            sys.exit("Make Failed...")
+        if args.build_application:
+            if os.system("cd " + builddir +
+            " && cmake ../qt-creator" +
+                " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+                " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
+            " && cmake --build . --target all" +
+            " && cmake --install . --prefix . --component Dependencies"):
+                sys.exit("Make Failed...")
+        if args.sign_application:
+            if os.system("cd " + builddir +
+            " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
+            " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true" +
+            " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
+            " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait || true" +
+            " && xcrun stapler staple OpenMV\\ IDE.app || true"):
+                sys.exit("Make Failed...")
+        if args.build_installer:
+            if os.system("cd " + builddir +
+            " && ../qt-creator/scripts/makedmg.sh OpenMV\\ IDE.app " + installer_name):
+                sys.exit("Make Failed...")
+        if args.sign_installer:
+            if os.system("cd " + builddir +
+            " && xcrun notarytool submit " + installer_name + " --keychain-profile \"AC_PASSWORD\" --wait || true" +
+            " && xcrun stapler staple " + installer_name + " || true"):
+                sys.exit("Make Failed...")
 
     elif sys.platform.startswith('linux'):
         installer_name = "openmv-ide-linux-x86_64-" + ideversion
         installer_archive_name = installer_name + "-installer-archive.7z"
-        if os.system("cd " + builddir +
-        " && cmake ../qt-creator" +
-            " -Wno-dev" +
-            " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
-            " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
-            " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-            " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
-        " && cmake --build . --target all" +
-        " && cmake --install . --prefix install" +
-        " && cmake --install . --prefix install --component Dependencies" +
-        " && cd install"
-        " && archivegen ../" + installer_archive_name + " bin lib share" +
-        " && cd .."
-        " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
+        if args.build_application:
+            if os.system("cd " + builddir +
+            " && cmake ../qt-creator" +
+                " -Wno-dev" +
+                " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
+                " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
+            " && cmake --build . --target all" +
+            " && cmake --install . --prefix install" +
+            " && cmake --install . --prefix install --component Dependencies"):
+                sys.exit("Make Failed...")
+        if args.build_installer:
+            if os.system("cd " + builddir +
+            " && cd install"
+            " && archivegen ../" + installer_archive_name + " bin lib share" +
+            " && cd .."
+            " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion + " -a " + installer_archive_name +
             " " + installer_name):
-            sys.exit("Make Failed...")
+                sys.exit("Make Failed...")
 
     else:
         sys.exit("Unknown Platform")
