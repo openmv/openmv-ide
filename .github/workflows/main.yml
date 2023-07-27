@@ -46,7 +46,6 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
       run: |
-        smksp_registrar list
         smctl keypair ls
         C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
         smksp_cert_sync
