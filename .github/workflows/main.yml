@@ -27,7 +27,6 @@ jobs:
       if: matrix.map.host == 'windows'
       run: |
         echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
-        cat /d/Certificate_pkcs12.p12
       shell: bash
 
     - name: ❖ Set variables
@@ -45,6 +44,11 @@ jobs:
 
     - name: ❖ Setup SSM KSP
       if: matrix.map.host == 'windows'
+      env:
+        SM_HOST: ${{ secrets.SM_HOST }}
+        SM_API_KEY: ${{ secrets.SM_API_KEY }}
+        SM_CLIENT_CERT_FILE: ${{ secrets.SM_CLIENT_CERT_FILE }}
+        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
       run: |
         curl -X GET  https://stage.one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:%SM_API_KEY%" -o smtools-windows-x64.msi
         msiexec /i smtools-windows-x64.msi /quiet /qn
