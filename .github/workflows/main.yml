@@ -28,9 +28,12 @@ jobs:
       env:
           SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
       run: |
-        CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+        CERTIFICATE_PATH=D:\\Certificate_pkcs12.p12
         echo "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $CERTIFICATE_PATH
-        echo "SM_CLIENT_CERT_FILE=$CERTIFICATE_PATH" >> "$GITHUB_ENV"
+        echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
+        echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+        echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+        echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
         echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
         echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
       shell: bash
@@ -41,9 +44,6 @@ jobs:
 
     - name: '❖ Install Windows Certificates (3/3)'
       if: matrix.map.host == 'windows'
-      env:
-        SM_HOST: ${{ secrets.SM_HOST }}
-        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
       run: |
         smksp_registrar list
         smctl keypair ls
@@ -58,9 +58,6 @@ jobs:
 
     - name: Signing using Signtool
       if: matrix.map.host == 'windows'
-      env:
-        SM_HOST: ${{ secrets.SM_HOST }}
-        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
       run: |
         signtool sign /sha1 ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
         signtool verify /v /pa "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
