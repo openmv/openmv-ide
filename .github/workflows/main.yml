@@ -28,7 +28,7 @@ jobs:
       env:
           SM_CLIENT_CERT_FILE: C:\Users\runneradmin\certificate.p12
           SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
-      run: echo $SM_CLIENT_CERT_FILE_B64 | base64 --decode > $SM_CLIENT_CERT_FILE
+      run: echo -n "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $SM_CLIENT_CERT_FILE
       shell: bash
 
     - name: ❖ Code signing with Secure Software Manager
