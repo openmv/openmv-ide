@@ -30,8 +30,6 @@ jobs:
       run: |
         CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
         echo "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $CERTIFICATE_PATH
-        echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
-        echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
         echo "SM_CLIENT_CERT_FILE=$CERTIFICATE_PATH" >> "$GITHUB_ENV"
         echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
         echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
