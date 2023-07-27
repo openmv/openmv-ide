@@ -23,47 +23,47 @@ jobs:
       fail-fast: true
     steps:
   
-    - name: '❖ Install Windows Certificate'
+    - name: ❖ Setup Certificate
       if: matrix.map.host == 'windows'
-      env:
-          SM_CLIENT_CERT_FILE: C:\Users\runneradmin\certificate.p12
-          SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
-      run: echo -n "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $SM_CLIENT_CERT_FILE
+      run: |
+        echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
+        cat /d/Certificate_pkcs12.p12
       shell: bash
 
-    - name: ❖ Code signing with Secure Software Manager
+    - name: ❖ Set variables
       if: matrix.map.host == 'windows'
-      env:
-          SM_HOST: ${{ secrets.SM_HOST }}
-          SM_API_KEY: ${{ secrets.SM_API_KEY }}
-          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-          SM_CLIENT_CERT_FILE: C:\Users\runneradmin\certificate.p12
-      uses: digicert/ssm-code-signing@v0.0.2
-
-    - name: '❖ Install Windows Tools'
-      if: matrix.map.host == 'windows'
-      env:
-          SM_HOST: ${{ secrets.SM_HOST }}
-          SM_API_KEY: ${{ secrets.SM_API_KEY }}
-          SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
-          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
       run: |
-        echo “The config file path ${{ steps.SSMClientToolSetup.outputs.PKCS11_CONFIG }}”
+        echo "::set-output name=version::${GITHUB_REF#refs/tags/v}"
+        echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
+        echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+        echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+        echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
         echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
         echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
-        echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH 
-        curl -X GET https://stage.one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:$SM_API_KEY" -o smtools-windows-x64.msi
+        echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
+      shell: bash
+
+    - name: ❖ Setup SSM KSP
+      if: matrix.map.host == 'windows'
+      run: |
+        curl -X GET  https://stage.one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:%SM_API_KEY%" -o smtools-windows-x64.msi
         msiexec /i smtools-windows-x64.msi /quiet /qn
         smksp_registrar.exe list
-        smctl.exe keypair ls 
+        smctl.exe keypair ls
         C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
         smksp_cert_sync.exe
-      shell: bash
+      shell: cmd
 
     - name: '⏳ Checkout repository'
       uses: actions/checkout@v3
       with:
         submodules: recursive
+
+    - name: Signing using Signtool
+      if: matrix.map.host == 'windows'
+      run: |
+        signtool.exe sign /sha1 ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
+        signtool.exe verify /v /pa "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
 
     - name: '🍏 Install Apple Certificates'
       if: matrix.map.host == 'mac'
