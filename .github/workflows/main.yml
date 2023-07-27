@@ -41,7 +41,7 @@ jobs:
           SM_API_KEY: ${{ secrets.SM_API_KEY }}
           SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
           SM_CLIENT_CERT_FILE: C:\Users\runneradmin\certificate.p12
-      uses: digicert/ssm-code-signing@latest-version
+      uses: digicert/ssm-code-signing@v0.0.2
 
     - name: '❖ Install Windows Tools'
       if: matrix.map.host == 'windows'
