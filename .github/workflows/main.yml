@@ -30,7 +30,7 @@ jobs:
       run: |
         CERTIFICATE_PATH=D:\\Certificate_pkcs12.p12
         echo -n "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $CERTIFICATE_PATH
-        echo "SM_CLIENT_CERT_FILE=$SM_CLIENT_CERT_FILE" >> "$GITHUB_ENV"
+        echo "SM_CLIENT_CERT_FILE=$CERTIFICATE_PATH" >> "$GITHUB_ENV"
         echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
         echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
       shell: bash
