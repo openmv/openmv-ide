@@ -28,7 +28,7 @@ jobs:
       env:
           SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
       run: |
-        CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+        CERTIFICATE_PATH=D:\\Certificate_pkcs12.p12
         echo -n "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $CERTIFICATE_PATH
         echo "SM_CLIENT_CERT_FILE=$SM_CLIENT_CERT_FILE" >> "$GITHUB_ENV"
         echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
@@ -37,8 +37,6 @@ jobs:
 
     - name: '❖ Install Windows Certificates (2/3)'
       if: matrix.map.host == 'windows'
-      env:
-        SM_API_KEY: ${{ secrets.SM_API_KEY }}
       uses: digicert/ssm-code-signing@v0.0.2
 
     - name: '❖ Install Windows Certificates (3/3)'
