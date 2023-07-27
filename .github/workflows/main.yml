@@ -28,7 +28,7 @@ jobs:
       env:
           SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
       run: |
-        CERTIFICATE_PATH=D:\\Certificate_pkcs12.p12
+        CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
         echo -n "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $CERTIFICATE_PATH
         echo "SM_CLIENT_CERT_FILE=$CERTIFICATE_PATH" >> "$GITHUB_ENV"
         echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
@@ -43,7 +43,6 @@ jobs:
       if: matrix.map.host == 'windows'
       env:
         SM_HOST: ${{ secrets.SM_HOST }}
-        SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
       run: |
         smksp_registrar list
