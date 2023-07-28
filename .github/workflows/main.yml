@@ -53,7 +53,7 @@ jobs:
     - name: Signing using Signtool
       if: matrix.map.host == 'windows'
       env:
-        SM_API_KEY: ${{ secrets.SM_API_KEY }}
+        SM_HOST: ${{ secrets.SM_HOST }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
       run: |
