@@ -283,17 +283,17 @@ def make():
     parser.add_argument("--rpi", nargs = '?',
     help = "Qt 6 Cross-Compile QTDIR for the Raspberry Pi")
 
-    parser.add_argument("--build-application", action=argparse.BooleanOptionalAction, default=True,
-    help = "Build the application")
+    parser.add_argument("--no-build-application", action='store_true', default=False,
+    help = "Don't build the application")
 
-    parser.add_argument("--sign-application", action=argparse.BooleanOptionalAction, default=True,
-    help = "Sign the application on windows and mac")
+    parser.add_argument("--no-sign-application", action='store_true', default=False,
+    help = "Don't sign the application on windows and mac")
 
-    parser.add_argument("--build-installer", action=argparse.BooleanOptionalAction, default=True,
-    help = "Build the installer")
+    parser.add_argument("--no-build-installer", action='store_true', default=False,
+    help = "Don't build the installer")
 
-    parser.add_argument("--sign-installer", action=argparse.BooleanOptionalAction, default=True,
-    help = "Sign the installer on windows and mac")
+    parser.add_argument("--no-sign-installer", action='store_true', default=False,
+    help = "Don't sign the installer on windows and mac")
 
     args = parser.parse_args()
 
@@ -323,7 +323,7 @@ def make():
 
     if args.rpi:
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
-        if args.build_application:
+        if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator -Wno-dev" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
@@ -337,7 +337,7 @@ def make():
             " && cmake --install . --prefix openmv-ide" +
             " && cmake --install . --prefix openmv-ide --component Dependencies"):
                 sys.exit("Make Failed...")
-        if args.build_installer:
+        if not args.no_build_installer:
             with open(os.path.join(installdir, "README.txt"), 'w') as f:
                 f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
                 f.write("    ./setup.sh\n\n")
@@ -383,7 +383,7 @@ def make():
     elif sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
         installer_archive_name = installer_name + "-installer-archive.7z"
-        if args.build_application:
+        if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
@@ -397,11 +397,11 @@ def make():
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies"):
                 sys.exit("Make Failed...")
-        if args.sign_application:
+        if not args.no_sign_application:
             if os.system("cd " + builddir +
             " && python -u ../qt-creator/scripts/sign.py install"):
                 sys.exit("Make Failed...")
-        if args.build_installer:
+        if not args.no_build_installer:
             if os.system("cd " + builddir +
             " && cd install" +
             " && archivegen ../" + installer_archive_name + " bin lib share" +
@@ -410,14 +410,14 @@ def make():
             " -v " + ideversion +
             " -a " + installer_archive_name + " " + installer_name):
                 sys.exit("Make Failed...")
-        if args.sign_installer:
+        if not args.no_sign_installer:
             if os.system("cd " + builddir +
             " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('darwin'):
         installer_name = "openmv-ide-mac-" + ideversion + ".dmg"
-        if args.build_application:
+        if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
@@ -427,7 +427,7 @@ def make():
             " && cmake --build . --target all" +
             " && cmake --install . --prefix . --component Dependencies"):
                 sys.exit("Make Failed...")
-        if args.sign_application:
+        if not args.no_sign_application:
             if os.system("cd " + builddir +
             " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
             " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true" +
@@ -435,11 +435,11 @@ def make():
             " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait || true" +
             " && xcrun stapler staple OpenMV\\ IDE.app || true"):
                 sys.exit("Make Failed...")
-        if args.build_installer:
+        if not args.no_build_installer:
             if os.system("cd " + builddir +
             " && ../qt-creator/scripts/makedmg.sh OpenMV\\ IDE.app " + installer_name):
                 sys.exit("Make Failed...")
-        if args.sign_installer:
+        if not args.no_sign_installer:
             if os.system("cd " + builddir +
             " && xcrun notarytool submit " + installer_name + " --keychain-profile \"AC_PASSWORD\" --wait || true" +
             " && xcrun stapler staple " + installer_name + " || true"):
@@ -448,7 +448,7 @@ def make():
     elif sys.platform.startswith('linux'):
         installer_name = "openmv-ide-linux-x86_64-" + ideversion
         installer_archive_name = installer_name + "-installer-archive.7z"
-        if args.build_application:
+        if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator" +
                 " -Wno-dev" +
@@ -460,7 +460,7 @@ def make():
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies"):
                 sys.exit("Make Failed...")
-        if args.build_installer:
+        if not args.no_build_installer:
             if os.system("cd " + builddir +
             " && cd install"
             " && archivegen ../" + installer_archive_name + " bin lib share" +
