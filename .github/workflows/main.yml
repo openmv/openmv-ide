@@ -55,6 +55,7 @@ jobs:
       env:
         SM_HOST: ${{ secrets.SM_HOST }}
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
+        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
       run: |
         signtool sign /sha1 %SM_CODE_SIGNING_CERT_SHA1_HASH% /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
