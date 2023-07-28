@@ -63,9 +63,9 @@ jobs:
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
       run: |
-        signtool sign /sha1 $SM_CODE_SIGNING_CERT_SHA1_HASH /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
+        signtool sign /sha1 %SM_CODE_SIGNING_CERT_SHA1_HASH% /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
         signtool verify /v /pa "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
-      shell: bash
+      shell: cmd
 
     - name: '🍏 Install Apple Certificates'
       if: matrix.map.host == 'mac'
