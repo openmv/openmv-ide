@@ -45,9 +45,7 @@ jobs:
         SM_HOST: ${{ secrets.SM_HOST }}
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-      run: |
-        C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
-        smksp_cert_sync
+      run: smksp_cert_sync
       shell: cmd
 
     - name: '⏳ Checkout repository'
