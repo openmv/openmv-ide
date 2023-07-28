@@ -20,8 +20,12 @@ jobs:
               {os: ubuntu-20.04, host: linux, suffix: run},
               {os: macos-11, host: mac, suffix: dmg},
               {os: ubuntu-20.04, host: linux-rpi, suffix: tar.gz}]
-      fail-fast: true
+      fail-fast: false
     steps:
+    - name: '⏳ Checkout repository'
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
   
     - name: '❖ Install Windows Certificates (1/3)'
       if: matrix.map.host == 'windows'
@@ -44,23 +48,6 @@ jobs:
       env:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
       run: smksp_cert_sync
-
-    - name: '⏳ Checkout repository'
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
-
-    - name: Signing using Signtool
-      if: matrix.map.host == 'windows'
-      env:
-        SM_HOST: ${{ secrets.SM_HOST }}
-        SM_API_KEY: ${{ secrets.SM_API_KEY }}
-        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-        SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: |
-        signtool sign /sha1 %SM_CODE_SIGNING_CERT_SHA1_HASH% /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
-        signtool verify /v /pa "D:\a\openmv-ide\openmv-ide\qt-creator\share\qtcreator\bossac\windows\bossac.exe"
-      shell: cmd
 
     - name: '🍏 Install Apple Certificates'
       if: matrix.map.host == 'mac'
@@ -182,6 +169,11 @@ jobs:
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows'
+      env:
+        SM_HOST: ${{ secrets.SM_HOST }}
+        SM_API_KEY: ${{ secrets.SM_API_KEY }}
+        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+        SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
       run: python make.py
 
     - name: '🏗 Build IDE on Linux'
