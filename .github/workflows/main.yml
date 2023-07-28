@@ -53,7 +53,6 @@ jobs:
     - name: Signing using Signtool
       if: matrix.map.host == 'windows'
       env:
-        SM_HOST: ${{ secrets.SM_HOST }}
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
@@ -214,6 +213,11 @@ jobs:
       with:
         path: 'build/openmv-ide-*.zip'
         if-no-files-found: error
+
+    - name: '❖ Remove Windows Certificates'
+      if: matrix.map.host == 'windows'
+      run: rm $SM_CLIENT_CERT_FILE
+      shell: bash
 
     - name: '🍏 Remove Apple Certificates'
       if: matrix.map.host == 'mac'
