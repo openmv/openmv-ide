@@ -283,16 +283,16 @@ def make():
     parser.add_argument("--rpi", nargs = '?',
     help = "Qt 6 Cross-Compile QTDIR for the Raspberry Pi")
 
-    parser.add_argument("--build_application", action='store_true', default=True,
+    parser.add_argument("--build-application", action=argparse.BooleanOptionalAction, default=True,
     help = "Build the application")
 
-    parser.add_argument("--sign_application", action='store_true', default=True,
+    parser.add_argument("--sign-application", action=argparse.BooleanOptionalAction, default=True,
     help = "Sign the application on windows and mac")
 
-    parser.add_argument("--build_installer", action='store_true', default=True,
+    parser.add_argument("--build-installer", action=argparse.BooleanOptionalAction, default=True,
     help = "Build the installer")
 
-    parser.add_argument("--sign_installer", action='store_true', default=True,
+    parser.add_argument("--sign-installer", action=argparse.BooleanOptionalAction, default=True,
     help = "Sign the installer on windows and mac")
 
     args = parser.parse_args()
