@@ -42,7 +42,6 @@ jobs:
     - name: '❖ Install Windows Certificates (3/3)'
       if: matrix.map.host == 'windows'
       env:
-        SM_HOST: ${{ secrets.SM_HOST }}
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
       run: smksp_cert_sync
 
