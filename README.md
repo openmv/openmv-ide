@@ -93,6 +93,12 @@ Note: `libxcb-xinerama0` may be required for the installer to run.
      cd <openmv-ide-install-dir>
      ./setup.sh
 
+Alternatively, the installer is a tar file with a setup script:
+
+     tar -xzvf openmv-ide-linux-x86_64-*.tar.gz
+     cd openmv-ide
+     ./setup.sh
+
 ### Mac
 
 The installer is a DMG with the app inside of it:
