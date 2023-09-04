@@ -469,6 +469,48 @@ def make():
             " -v " + ideversion + " -a " + installer_archive_name +
             " " + installer_name):
                 sys.exit("Make Failed...")
+        else:
+            with open(os.path.join(installdir, "README.txt"), 'w') as f:
+                f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
+                f.write("    ./setup.sh\n\n")
+                f.write("And then run OpenMV IDE:\n\n")
+                f.write("    ./bin/openmvide\n")
+            with open(os.path.join(installdir, "setup.sh"), 'w') as f:
+                f.write("#! /bin/sh\n\n")
+                f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
+                f.write("sudo apt-get install -y libfontconfig1 libfreetype6 libxcb1 libxcb-glx0 libxcb-keysyms1 libxcb-image0 libxcb-shm0 libxcb-icccm4 libxcb-xfixes0 libxcb-shape0 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0\n")
+                f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip\n")
+                f.write("sudo pip install pyusb\n\n")
+                f.write("sudo cp $DIR/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/\n")
+                f.write("sudo udevadm trigger\n")
+                f.write("sudo udevadm control --reload-rules\n\n")
+                f.write("cp -r \"$DIR/share/icons\" \"/home/$USER/.local/share/icons\"\n")
+                f.write("sudo cp -r \"$DIR/share/icons\" /usr/share/\n")
+                f.write("rm -rf \"$DIR/share/icons\"\n")
+                f.write("sudo gtk-update-icon-cache\n\n")
+                f.write("cat > \"/home/$USER/Desktop/openmvide.desktop\" << EOM\n")
+                f.write("[Desktop Entry]\n")
+                f.write("Type=Application\n")
+                f.write("Name=OpenMV IDE\n")
+                f.write("GenericName=OpenMV IDE\n")
+                f.write("Comment=The IDE of choice for OpenMV Cam Development.\n")
+                f.write("Exec=\"$DIR/bin/openmvide\" %F\n")
+                f.write("Icon=OpenMV-openmvide\n")
+                f.write("Terminal=false\n")
+                f.write("Categories=Development;IDE;Electronics;OpenMV;\n")
+                f.write("MimeType=text/x-python;\n")
+                f.write("Keywords=embedded electronics;electronics;microcontroller;micropython;computer vision;machine vision;\n")
+                f.write("StartupWMClass=openmvide\n")
+                f.write("EOM\n")
+                f.write("cp \"/home/$USER/Desktop/openmvide.desktop\"  \"/home/$USER/.local/share/applications/\"\n")
+                f.write("sudo cp \"/home/$USER/Desktop/openmvide.desktop\" /usr/share/applications/\n")
+            os.chmod(os.path.join(installdir, "setup.sh"),
+                os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            if os.system("cd " + builddir +
+            " && rm -rf openmv-ide"
+            " && cp -r install openmv-ide"
+            " && tar -czvf " + installer_name + ".tar.gz openmv-ide"):
+                sys.exit("Make Failed...")
 
     else:
         sys.exit("Unknown Platform")
