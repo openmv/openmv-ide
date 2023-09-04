@@ -201,14 +201,14 @@ jobs:
         path: 'build/openmv-ide-*.${{ matrix.map.suffix }}'
         if-no-files-found: error
 
-    - name: '⬆ Upload resources'
+    - name: '⬆ Upload resources (1/2)'
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
       uses: actions/upload-artifact@v3
       with:
         path: 'build/openmv-ide-*.tar.gz'
         if-no-files-found: error
   
-    - name: '⬆ Upload resources'
+    - name: '⬆ Upload resources (2/2)'
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
       uses: actions/upload-artifact@v3
       with:
