@@ -206,21 +206,21 @@ jobs:
       if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@v3
       with:
-        path: 'build/openmv-ide-*.${{ matrix.map.suffix }}'
+        path: 'build/openmv-*.${{ matrix.map.suffix }}'
         if-no-files-found: error
 
     - name: '⬆ Upload resources (1/2)'
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
       uses: actions/upload-artifact@v3
       with:
-        path: 'build/openmv-ide-*.tar.gz'
+        path: 'build/openmv-*.tar.gz'
         if-no-files-found: error
   
     - name: '⬆ Upload resources (2/2)'
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
       uses: actions/upload-artifact@v3
       with:
-        path: 'build/openmv-ide-*.zip'
+        path: 'build/openmv-*.zip'
         if-no-files-found: error
 
     - name: '❖ Remove Windows Certificates'
@@ -261,7 +261,7 @@ jobs:
     - name: '🧹 Remove artifacts'
       uses: geekyeggo/delete-artifact@v2
       with:
-        name: 'openmv-ide-*'
+        name: 'openmv-*'
         failOnError: false
 
   development-release:
@@ -307,5 +307,5 @@ jobs:
     - name: '🧹 Remove artifacts'
       uses: geekyeggo/delete-artifact@v2
       with:
-        name: 'openmv-ide-*'
+        name: 'openmv-*'
         failOnError: false
