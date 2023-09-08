@@ -16,10 +16,11 @@ jobs:
     runs-on: ${{ matrix.map.os }}
     strategy:
       matrix:
-        map: [{os: windows-2019, host: windows, suffix: exe},
-              {os: ubuntu-20.04, host: linux, suffix: run},
-              {os: macos-11, host: mac, suffix: dmg},
-              {os: ubuntu-20.04, host: linux-rpi, suffix: tar.gz}]
+        map: [{os: windows-2019, host: windows, suffix: exe, make_args: ''},
+              {os: windows-2019, host: windows, suffix: exe, make_args: '--factory'},
+              {os: ubuntu-20.04, host: linux, suffix: run, make_args: ''},
+              {os: macos-11, host: mac, suffix: dmg, make_args: ''},
+              {os: ubuntu-20.04, host: linux-rpi, suffix: tar.gz, make_args: ''}]
       fail-fast: false
     steps:
     - name: '⏳ Checkout repository'
@@ -174,25 +175,32 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py
+        MAKE_ARGS: ${{ matrix.map.make_args }}
+      run: python make.py $MAKE_ARGS
 
     - name: '🏗 Build IDE on Linux'
       if: matrix.map.host == 'linux'
+      env:
+        MAKE_ARGS: ${{ matrix.map.make_args }}
       run: |
         sudo apt-get install -y chrpath
-        python make.py
-        python make.py --no-build-installer
+        python make.py $MAKE_ARGS
+        python make.py --no-build-installer $MAKE_ARGS
         version=$(ls build | grep -oP 'openmv-ide-linux-x86_64-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.run)')
         cd qt-creator/share/qtcreator
         zip -r ../../../build/openmv-ide-resources-${version}.zip examples firmware html models
 
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac'
-      run: python make.py
+      env:
+        MAKE_ARGS: ${{ matrix.map.make_args }}
+      run: python make.py $MAKE_ARGS
 
     - name: '🏗 Build IDE on Linux for Raspberry Pi'
       if: matrix.map.host == 'linux-rpi'
-      run: python make.py --rpi ~/qt-raspi
+      env:
+        MAKE_ARGS: ${{ matrix.map.make_args }}
+      run: python make.py --rpi ~/qt-raspi $MAKE_ARGS
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
