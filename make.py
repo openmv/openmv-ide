@@ -295,6 +295,9 @@ def make():
     parser.add_argument("--no-sign-installer", action='store_true', default=False,
     help = "Don't sign the installer on windows and mac")
 
+    parser.add_argument("--factory", action='store_true', default=False,
+    help = "Build OpenMV IDE for the factory")
+
     args = parser.parse_args()
 
     if args.rpi and not sys.platform.startswith('linux'):
@@ -321,8 +324,18 @@ def make():
     if not os.path.exists(installdir):
         os.mkdir(installdir)
 
+    cxx_flags_init = ""
+
+    if args.factory:
+        cxx_flags_init += "-DFORCE_FORM_KEY_DIALOG "
+        cxx_flags_init += "-DFORCE_AUTO_CONNECT "
+        cxx_flags_init += "-DFORCE_AUTO_UPDATE=release "
+        cxx_flags_init += "-DFORCE_AUTO_RUN "
+        cxx_flags_init += "-DFORCE_OVERRIDE_READ_TIMEOUT=3000 "
+
     if args.rpi:
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
+        if args.factory: installer_name.replace("openmv", "openmv-factory")
         if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator -Wno-dev" +
@@ -331,7 +344,7 @@ def make():
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_C_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-gcc-9\"" +
                 " \"-DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-g++-9\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
                 " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix openmv-ide" +
@@ -382,6 +395,7 @@ def make():
 
     elif sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
+        if args.factory: installer_name.replace("openmv", "openmv-factory")
         installer_archive_name = installer_name + "-installer-archive.7z"
         if not args.no_build_application:
             if os.system("cd " + builddir +
@@ -392,7 +406,7 @@ def make():
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_C_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/gcc.exe") + "\"" +
                 " \"-DCMAKE_CXX_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/g++.exe") + "\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies"):
@@ -417,13 +431,14 @@ def make():
 
     elif sys.platform.startswith('darwin'):
         installer_name = "openmv-ide-mac-" + ideversion + ".dmg"
+        if args.factory: installer_name.replace("openmv", "openmv-factory")
         if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\""
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix . --component Dependencies"):
                 sys.exit("Make Failed...")
@@ -447,6 +462,7 @@ def make():
 
     elif sys.platform.startswith('linux'):
         installer_name = "openmv-ide-linux-x86_64-" + ideversion
+        if args.factory: installer_name.replace("openmv", "openmv-factory")
         installer_archive_name = installer_name + "-installer-archive.7z"
         if not args.no_build_application:
             if os.system("cd " + builddir +
@@ -455,7 +471,7 @@ def make():
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies"):
