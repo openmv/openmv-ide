@@ -335,7 +335,7 @@ def make():
 
     if args.rpi:
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
-        if args.factory: installer_name.replace("openmv", "openmv-factory")
+        if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator -Wno-dev" +
@@ -395,7 +395,7 @@ def make():
 
     elif sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
-        if args.factory: installer_name.replace("openmv", "openmv-factory")
+        if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         installer_archive_name = installer_name + "-installer-archive.7z"
         if not args.no_build_application:
             if os.system("cd " + builddir +
@@ -431,7 +431,7 @@ def make():
 
     elif sys.platform.startswith('darwin'):
         installer_name = "openmv-ide-mac-" + ideversion + ".dmg"
-        if args.factory: installer_name.replace("openmv", "openmv-factory")
+        if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator" +
@@ -462,7 +462,7 @@ def make():
 
     elif sys.platform.startswith('linux'):
         installer_name = "openmv-ide-linux-x86_64-" + ideversion
-        if args.factory: installer_name.replace("openmv", "openmv-factory")
+        if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         installer_archive_name = installer_name + "-installer-archive.7z"
         if not args.no_build_application:
             if os.system("cd " + builddir +
