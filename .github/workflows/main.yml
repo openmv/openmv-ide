@@ -25,7 +25,7 @@ jobs:
     steps:
     - name: '❖ Fix default line endings on Windows'
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-        run: git config --global core.autocrlf input
+      run: git config --global core.autocrlf input
 
     - name: '⏳ Checkout repository'
       uses: actions/checkout@v3
