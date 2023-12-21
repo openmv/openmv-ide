@@ -180,7 +180,9 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py
+      run: |
+        python make.py
+        python make.py --no-build-installer
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows-factory'
@@ -189,7 +191,9 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py --factory
+      run: |
+        python make.py --factory
+        python make.py --factory --no-build-installer
 
     - name: '🏗 Build IDE on Linux'
       if: matrix.map.host == 'linux'
@@ -216,6 +220,13 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         path: 'build/openmv-*.${{ matrix.map.suffix }}'
+        if-no-files-found: error
+
+    - name: '⬆ Upload zip'
+      if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory')
+      uses: actions/upload-artifact@v3
+      with:
+        path: 'build/openmv-*.zip'
         if-no-files-found: error
 
     - name: '⬆ Upload resources (1/2)'

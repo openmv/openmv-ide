@@ -2,7 +2,7 @@
 
 # by: Kwabena W. Agyeman - kwagyeman@openmv.io
 
-import argparse, os, re, stat, sys
+import argparse, os, re, shutil, stat, sys
 
 def match(d0, d1):
     x = [x for x in os.listdir(d0) if re.match(d1, x)]
@@ -424,9 +424,31 @@ def make():
             " -v " + ideversion +
             " -a " + installer_archive_name + " " + installer_name):
                 sys.exit("Make Failed...")
-        if not args.no_sign_installer:
-            if os.system("cd " + builddir +
-            " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
+            if not args.no_sign_installer:
+                if os.system("cd " + builddir +
+                " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
+                    sys.exit("Make Failed...")
+        else:
+            with open(os.path.join(installdir, "README.txt"), 'w') as f:
+                f.write("Please run setup.cmd to install OpenMV IDE's drivers:\r\n\r\n")
+                f.write("    Double click on setup.cmd\r\n\r\n")
+                f.write("And then to run OpenMV IDE:\r\n\r\n")
+                f.write("    Double click on bin\\openmvide.exe\r\n")
+            with open(os.path.join(installdir, "setup.cmd"), 'w') as f:
+                f.write("@echo off\r\n")
+                f.write("NET FILE 1>NUL 2>NUL & IF ERRORLEVEL 1 (ECHO You must right-click this file and select \"Run as administrator\" to run the setup script. & ECHO. & PAUSE & EXIT /D)\r\n")
+                f.write("cmd /c \"%~dp0\\share\\qtcreator\\drivers\\ftdi\\ftdi.cmd\"\r\n")
+                f.write("cmd /c \"%~dp0\\share\\qtcreator\\drivers\\openmv\\openmv.cmd\"\r\n")
+                f.write("cmd /c \"%~dp0\\share\\qtcreator\\drivers\\arduino\\arduino.cmd\"\r\n")
+                f.write("cmd /c \"%~dp0\\share\\qtcreator\\drivers\\dfuse.cmd\"\r\n")
+                f.write("cmd /c \"%~dp0\\share\\qtcreator\\drivers\\vcr.cmd\"\r\n")
+                f.write("ECHO All drivers have been successfully installed! & ECHO. & PAUSE & EXIT /D\r\n")
+            output_dir = os.path.join(builddir, "openmv-ide")
+            if os.path.exists(output_dir):
+                shutil.rmtree(output_dir)
+            shutil.copytree(os.path.join(builddir, "install"), output_dir)
+            if os.system("cd " + output_dir +
+            " && archivegen -f zip ../" + installer_name + " bin lib share README.txt setup.cmd"):
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('darwin'):
