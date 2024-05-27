@@ -125,6 +125,8 @@ jobs:
       if: matrix.map.host == 'linux-rpi'
       run: |
         sudo apt-mark hold grub-efi-amd64-signed
+        sudo apt update --fix-missing -y
+        sudo apt upgrade -y
         sudo apt-get install -y make
         sudo apt-get install -y build-essential
         sudo apt-get install -y libclang-dev
@@ -166,6 +168,7 @@ jobs:
         sudo apt-get install -y gcc-aarch64-linux-gnu
         sudo apt-get install -y g++-aarch64-linux-gnu
         sudo apt-get install -y libclang-11-dev
+        sudo apt-get install -y libstdc++6
         sudo cp cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
         cd ~
         wget https://github.com/openmv/qt-raspi/releases/download/v6.5.1/qt-raspi.tar.gz
