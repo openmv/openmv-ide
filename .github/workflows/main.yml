@@ -221,28 +221,28 @@ jobs:
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: 'build/openmv-*.${{ matrix.map.suffix }}'
         if-no-files-found: error
 
     - name: '⬆ Upload zip'
       if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: 'build/openmv-*.zip'
         if-no-files-found: error
 
     - name: '⬆ Upload resources (1/2)'
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: 'build/openmv-*.tar.gz'
         if-no-files-found: error
   
     - name: '⬆ Upload resources (2/2)'
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         path: 'build/openmv-*.zip'
         if-no-files-found: error
@@ -262,7 +262,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: '🤌 Download artifacts'
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4
 
     - name: "✏️ Generate release changelog"
       id: changelog
@@ -296,7 +296,7 @@ jobs:
       contents: write
     steps:
     - name: '🤌 Download artifacts'
-      uses: actions/download-artifact@v4.1.7
+      uses: actions/download-artifact@v4
 
     - name: '🧹 Delete old release'
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
