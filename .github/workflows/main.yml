@@ -223,6 +223,7 @@ jobs:
       if: github.event_name != 'pull_request'
       uses: actions/upload-artifact@v4
       with:
+        name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}
         path: 'build/openmv-*.${{ matrix.map.suffix }}'
         if-no-files-found: error
 
@@ -230,6 +231,7 @@ jobs:
       if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory')
       uses: actions/upload-artifact@v4
       with:
+        name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}
         path: 'build/openmv-*.zip'
         if-no-files-found: error
 
@@ -237,6 +239,7 @@ jobs:
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
       uses: actions/upload-artifact@v4
       with:
+        name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}
         path: 'build/openmv-*.tar.gz'
         if-no-files-found: error
   
@@ -244,6 +247,7 @@ jobs:
       if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
       uses: actions/upload-artifact@v4
       with:
+        name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}
         path: 'build/openmv-*.zip'
         if-no-files-found: error
 
@@ -263,6 +267,10 @@ jobs:
     steps:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v4
+      with:
+        path: artifact
+        pattern: artifact-*
+        merge-multiple: true
 
     - name: "✏️ Generate release changelog"
       id: changelog
@@ -297,6 +305,10 @@ jobs:
     steps:
     - name: '🤌 Download artifacts'
       uses: actions/download-artifact@v4
+      with:
+        path: artifact
+        pattern: artifact-*
+        merge-multiple: true
 
     - name: '🧹 Delete old release'
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
