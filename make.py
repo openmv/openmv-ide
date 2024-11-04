@@ -469,6 +469,7 @@ def make():
             " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
             " && find \"OpenMV IDE.app\"/Contents/Imports/qtquick2 -name \"*.dylib\" -exec codesign -s Application --force --options=runtime --timestamp {} \; || true" +
             " && find \"OpenMV IDE.app\"/Contents/Resources/python/mac/lib -name \"*.dylib\" -exec codesign -s Application --force --options=runtime --timestamp {} \; || true" +
+            " && find \"OpenMV IDE.app\"/Contents/Resources/pylsb/mac -name \"*.so\" -exec codesign -s Application --force --options=runtime --timestamp {} \; || true" +
             " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true" +
             " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
             " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait || true" +
