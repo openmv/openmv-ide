@@ -19,7 +19,7 @@ jobs:
         map: [{os: windows-2019, host: windows, suffix: exe},
               {os: windows-2019, host: windows-factory, suffix: exe},
               {os: ubuntu-20.04, host: linux, suffix: run},
-              {os: macos-12, host: mac, suffix: dmg},
+              {os: macos-13, host: mac, suffix: dmg},
               {os: ubuntu-20.04, host: linux-rpi, suffix: tar.gz}]
       fail-fast: false
     steps:
