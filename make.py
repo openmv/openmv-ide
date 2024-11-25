@@ -337,8 +337,7 @@ def make():
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         if not args.no_build_application:
-            if not os.path.exists(os.path.join(installdir, "lib/Qt/lib")):
-                os.mkdir(os.path.join(installdir, "lib/Qt/lib"))
+            os.makedirs(os.path.join(installdir, "lib/Qt/lib"), exist_ok=True)
             if os.system("cd " + builddir +
             " && wget http://ftp.us.debian.org/debian/pool/main/i/icu/libicu67_67.1-7_arm64.deb"
             " && dpkg-deb -x libicu67_67.1-7_arm64.deb icu67"
