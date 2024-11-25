@@ -337,7 +337,12 @@ def make():
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         if not args.no_build_application:
+            if not os.path.exists(os.path.join(installdir, "lib/Qt/lib")):
+                os.mkdir(os.path.join(installdir, "lib/Qt/lib"))
             if os.system("cd " + builddir +
+            " && wget http://ftp.us.debian.org/debian/pool/main/i/icu/libicu67_67.1-7_arm64.deb"
+            " && dpkg-deb -x libicu67_67.1-7_arm64.deb icu67"
+            " && cp -rv icu67/usr/lib/aarch64-linux-gnu/* openmv-ide/lib/Qt/lib/"
             " && cmake ../qt-creator -Wno-dev" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
@@ -361,9 +366,8 @@ def make():
                 f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
                 f.write("sudo apt-get update -y\n")
                 f.write("sudo apt-get full-upgrade -y\n")
-                f.write("sudo apt-get install -y libboost-all-dev libudev-dev libinput-dev libts-dev libmtdev-dev libjpeg-dev libfontconfig1-dev libssl-dev libdbus-1-dev libglib2.0-dev libxkbcommon-dev libegl1-mesa-dev libgbm-dev libgles2-mesa-dev mesa-common-dev libasound2-dev libpulse-dev gstreamer1.0-omx libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev  gstreamer1.0-alsa libvpx-dev libsrtp2-dev libsnappy-dev libnss3-dev \"^libxcb.*\" flex bison libxslt-dev ruby gperf libbz2-dev libcups2-dev libatkmm-1.6-dev libxi6 libxcomposite1 libfreetype6-dev libicu-dev libsqlite3-dev libxslt1-dev libavcodec-dev libavformat-dev libswscale-dev libx11-dev freetds-dev libsqlite3-dev libpq-dev libiodbc2-dev firebird-dev libgst-dev libxext-dev libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync1 libxcb-sync-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-glx0-dev libxi-dev libdrm-dev libxcb-xinerama0 libxcb-xinerama0-dev libatspi2.0-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxss-dev libxtst-dev libpci-dev libcap-dev libxrandr-dev libdirectfb-dev libaudio-dev libxkbcommon-x11-dev\n\n")
-                f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip\n")
-                f.write("sudo pip install pyusb\n\n")
+                f.write("sudo apt-get install -y libboost-all-dev libudev-dev libinput-dev libts-dev libmtdev-dev libjpeg-dev libfontconfig1-dev libssl-dev libdbus-1-dev libglib2.0-dev libxkbcommon-dev libegl1-mesa-dev libgbm-dev libgles2-mesa-dev mesa-common-dev libasound2-dev libpulse-dev gstreamer1.0-omx libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev  gstreamer1.0-alsa libvpx-dev libsrtp2-dev libsnappy-dev libnss3-dev \"^libxcb.*\" flex bison libxslt-dev ruby gperf libbz2-dev libcups2-dev libatkmm-1.6-dev libxi6 libxcomposite1 libfreetype6-dev libicu-dev libsqlite3-dev libxslt1-dev libavcodec-dev libavformat-dev libswscale-dev libx11-dev freetds-dev libsqlite3-dev libpq-dev libiodbc2-dev firebird-dev libgst-dev libxext-dev libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync1 libxcb-sync-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-glx0-dev libxi-dev libdrm-dev libxcb-xinerama0 libxcb-xinerama0-dev libatspi2.0-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxss-dev libxtst-dev libpci-dev libcap-dev libxrandr-dev libdirectfb-dev libaudio-dev libxkbcommon-x11-dev libxcb-cursor0\n\n")
+                f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip python3-usb\n")
                 f.write("sudo cp $DIR/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/\n")
                 f.write("sudo udevadm trigger\n")
                 f.write("sudo udevadm control --reload-rules\n\n")
@@ -413,7 +417,7 @@ def make():
                 sys.exit("Make Failed...")
         if not args.no_sign_application:
             if os.system("cd " + builddir +
-            " && python -u ../qt-creator/scripts/sign.py install"):
+            " && python -u ../qt-creator/scripts/sign.py install/bin/openmvide.exe"):
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
             if os.system("cd " + builddir +
