@@ -85,6 +85,10 @@ The installer will need administrator privileges which it should ask for when ru
 
      ./openmv-ide-windows-*.exe --al --am -c in
 
+And uninstall:
+
+    ./OpenMVIDEUninst.exe --am -c pr
+
 ### Linux
 
 Note: `libxcb-xinerama0` may be required for the installer to run.
@@ -93,11 +97,19 @@ Note: `libxcb-xinerama0` may be required for the installer to run.
      cd <openmv-ide-install-dir>
      ./setup.sh
 
+And uninstall:
+
+     sudo ./OpenMVIDEUninstaller --am -c pr
+
 Alternatively, the installer is a tar file with a setup script:
 
      tar -xzvf openmv-ide-linux-x86_64-*.tar.gz
      cd openmv-ide
      ./setup.sh
+
+And uninstall:
+
+    rm -rf openmv-ide
 
 ### Mac
 
@@ -107,6 +119,10 @@ The installer is a DMG with the app inside of it:
      sudo cp -rf /Volumes/OpenMV\ IDE/OpenMV\ IDE.app /Applications
      sudo hdiutil detach /Volumes/OpenMV\ IDE
 
+And uninstall:
+
+    sudo rm -rf /Applications/OpenMV\ IDE.app
+
 ### RaspberryPi
 
 The installer is a tar file with a setup script:
@@ -114,6 +130,10 @@ The installer is a tar file with a setup script:
      tar -xzvf openmv-ide-linux-arm64-*.tar.gz
      cd openmv-ide
      ./setup.sh
+
+And uninstall:
+
+    rm -rf openmv-ide
 
 ## Contributing to the project
 
