@@ -342,7 +342,7 @@ def make():
             " && wget http://ftp.us.debian.org/debian/pool/main/i/icu/libicu67_67.1-7_arm64.deb"
             " && dpkg-deb -x libicu67_67.1-7_arm64.deb icu67"
             " && cp -rv icu67/usr/lib/aarch64-linux-gnu/* openmv-ide/lib/Qt/lib/"
-            " && cmake ../qt-creator -Wno-dev" +
+            " && cmake ../qt-creator -Wno-dev --debug-find-pkg=Qt6Gui -DQT_DEBUG_FIND_PACKAGE=ON" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
