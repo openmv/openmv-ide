@@ -16,11 +16,11 @@ jobs:
     runs-on: ${{ matrix.map.os }}
     strategy:
       matrix:
+        # {os: ubuntu-22.04, host: linux-rpi, suffix: tar.gz}
         map: [{os: windows-2019, host: windows, suffix: exe},
               {os: windows-2019, host: windows-factory, suffix: exe},
-              {os: ubuntu-20.04, host: linux, suffix: run},
-              {os: macos-13, host: mac, suffix: dmg},
-              {os: ubuntu-20.04, host: linux-rpi, suffix: tar.gz}]
+              {os: ubuntu-22.04, host: linux, suffix: run},
+              {os: macos-13, host: mac, suffix: dmg}]
       fail-fast: false
     steps:
     - name: '❖ Fix default line endings on Windows'
