@@ -52,7 +52,7 @@ jobs:
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
       env:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
-      run: smksp_cert_sync
+      run: smctl windows certsync --keypair-alias=$SM_API_KEY
 
     - name: '🍏 Install Apple Certificates'
       if: matrix.map.host == 'mac'
