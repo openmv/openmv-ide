@@ -476,7 +476,8 @@ def make():
             " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true" +
             " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
             " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait || true" +
-            " && xcrun stapler staple OpenMV\\ IDE.app || true"):
+            " && xcrun stapler staple OpenMV\\ IDE.app || true" +
+            " && rm OpenMV\\ IDE.zip || true"):
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
             if os.system("cd " + builddir +
