@@ -23,7 +23,7 @@
 
 ## Overview
 
-OpenMV IDE is a cross platform integrated development enviornment for writing python code to run on your OpenMV Cam. It includes all the necessary features and tools to update your OpenMV Cam's firmware and help you develop your application quickly.
+OpenMV IDE is a cross platform integrated development environment for writing python code to run on your OpenMV Cam. It includes all the necessary features and tools to update your OpenMV Cam's firmware and help you develop your application quickly.
 
 ## Compiling OpenMV IDE for Windows, Linux, and Mac
 
@@ -48,7 +48,7 @@ Next you need to download a bunch of packages required for the gui:
 
      sudo apt-get install make build-essential libclang-dev ninja-build gcc git bison python3 gperf pkg-config libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev libatspi2.0-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev
 
-Aftwards, you need to install the cross-compilier. Please note that by using `ubuntu-20.04` this command should install version 9 of the cross-compilier. Using a newer version of the operating system will result in a newer version of the cross-compilier which will cause linker mismatch issues between the host system and the RaspberryPi:
+Afterwards, you need to install the cross-compiler. Please note that by using `ubuntu-20.04` this command should install version 9 of the cross-compiler. Using a newer version of the operating system will result in a newer version of the cross-compiler which will cause linker mismatch issues between the host system and the RaspberryPi:
 
      sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
