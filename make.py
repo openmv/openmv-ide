@@ -465,7 +465,9 @@ def make():
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
-            " && cmake --install . --prefix . --component Dependencies"):
+            " && cmake --install . --prefix . --component Dependencies"
+            " && rm -rf share" # Save disk space
+            " && rm -rf src"): # Save disk space
                 sys.exit("Make Failed...")
         if not args.no_sign_application:
             if os.system("cd " + builddir +
