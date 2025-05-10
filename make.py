@@ -502,7 +502,11 @@ def make():
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
-            " && cmake --install . --prefix install --component Dependencies"):
+            " && cmake --install . --prefix install --component Dependencies"
+            " && rm -rf bin" # Save disk space
+            " && rm -rf lib" # Save disk space
+            " && rm -rf share" # Save disk space
+            " && rm -rf src"): # Save disk space
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
             if os.system("cd " + builddir +
