@@ -20,6 +20,7 @@ jobs:
         map: [{os: windows-2019, host: windows, suffix: exe},
               {os: windows-2019, host: windows-factory, suffix: exe},
               {os: ubuntu-22.04, host: linux, suffix: run},
+              {os: ubuntu-22.04, host: linux, suffix: tar.gz},
               {os: macos-13, host: mac, suffix: dmg}]
       fail-fast: false
     steps:
@@ -199,17 +200,24 @@ jobs:
         python make.py --factory
         python make.py --factory --no-build-installer
 
-    - name: '🏗 Build IDE on Linux'
-      if: matrix.map.host == 'linux'
+    - name: '🏗 Build IDE on Linux .run'
+      if: matrix.map.host == 'linux' && matrix.map.suffix == 'run'
       env:
         MAKE_ARGS: ${{ matrix.map.make_args }}
       run: |
         sudo apt-get install -y chrpath
         python make.py
-        python make.py --no-build-installer
         version=$(ls build | grep -oP 'openmv-ide-linux-x86_64-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.run)')
         cd qt-creator/share/qtcreator
         zip -r ../../../build/openmv-ide-resources-${version}.zip examples firmware html models
+
+    - name: '🏗 Build IDE on Linux .tar.gz'
+      if: matrix.map.host == 'linux' && matrix.map.suffix == 'tar.gz'
+      env:
+        MAKE_ARGS: ${{ matrix.map.make_args }}
+      run: |
+        sudo apt-get install -y chrpath
+        python make.py --no-build-installer
 
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac'
@@ -228,23 +236,7 @@ jobs:
         if-no-files-found: error
 
     - name: '⬆ Upload zip'
-      if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory')
-      uses: actions/upload-artifact@v4
-      with:
-        name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}-zip
-        path: 'build/openmv-*.zip'
-        if-no-files-found: error
-
-    - name: '⬆ Upload resources (1/2)'
-      if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
-      uses: actions/upload-artifact@v4
-      with:
-        name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}-tar-gz
-        path: 'build/openmv-*.tar.gz'
-        if-no-files-found: error
-  
-    - name: '⬆ Upload resources (2/2)'
-      if: github.event_name != 'pull_request' && matrix.map.host == 'linux'
+      if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || matrix.map.host == 'linux')
       uses: actions/upload-artifact@v4
       with:
         name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}-zip
