@@ -352,7 +352,13 @@ def make():
                 " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix openmv-ide" +
-            " && cmake --install . --prefix openmv-ide --component Dependencies"):
+            " && cmake --install . --prefix openmv-ide --component Dependencies" +
+            " && mv share/qtcreator/arm install/share/qtcreator/arm" +
+            " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai" +
+            " && rm -rf bin" + # Save disk space
+            " && rm -rf lib" + # Save disk space
+            " && rm -rf share" + # Save disk space
+            " && rm -rf src"): # Save disk space
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
             with open(os.path.join(installdir, "README.txt"), 'w') as f:
@@ -412,7 +418,13 @@ def make():
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
-            " && cmake --install . --prefix install --component Dependencies"):
+            " && cmake --install . --prefix install --component Dependencies" +
+            " && mv share/qtcreator/arm install/share/qtcreator/arm" +
+            " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai" +
+            " && rm -rf bin" + # Save disk space
+            " && rm -rf lib" + # Save disk space
+            " && rm -rf share" + # Save disk space
+            " && rm -rf src"): # Save disk space
                 sys.exit("Make Failed...")
         if not args.no_sign_application:
             if os.system("cd " + builddir +
@@ -465,7 +477,7 @@ def make():
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
-            " && cmake --install . --prefix . --component Dependencies"
+            " && cmake --install . --prefix . --component Dependencies" +
             " && rm -rf share" # Save disk space
             " && rm -rf src"): # Save disk space
                 sys.exit("Make Failed...")
@@ -502,10 +514,12 @@ def make():
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
-            " && cmake --install . --prefix install --component Dependencies"
-            " && rm -rf bin" # Save disk space
-            " && rm -rf lib" # Save disk space
-            " && rm -rf share" # Save disk space
+            " && cmake --install . --prefix install --component Dependencies" +
+            " && mv share/qtcreator/arm install/share/qtcreator/arm" +
+            " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai" +
+            " && rm -rf bin" + # Save disk space
+            " && rm -rf lib" + # Save disk space
+            " && rm -rf share" + # Save disk space
             " && rm -rf src"): # Save disk space
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
