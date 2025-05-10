@@ -236,7 +236,7 @@ jobs:
         if-no-files-found: error
 
     - name: '⬆ Upload zip'
-      if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || matrix.map.host == 'linux')
+      if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || ((matrix.map.host == 'linux') && (matrix.map.suffix == 'run'))
       uses: actions/upload-artifact@v4
       with:
         name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}-zip
