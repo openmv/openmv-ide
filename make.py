@@ -463,7 +463,7 @@ def make():
                 shutil.rmtree(output_dir)
             shutil.copytree(os.path.join(builddir, "install"), output_dir)
             if os.system("cd " + output_dir +
-            " && archivegen -f zip ../" + installer_name + " bin lib share README.txt setup.cmd"):
+            " && archivegen -f zip -c 9 ../" + installer_name + " bin lib share README.txt setup.cmd"):
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('darwin'):
