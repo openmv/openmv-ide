@@ -569,7 +569,7 @@ def make():
                 os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             if os.system("cd " + builddir +
             " && rm -rf openmv-ide"
-            " && mv -r install openmv-ide"
+            " && mv install openmv-ide"
             " && tar -czvf " + installer_name + ".tar.gz openmv-ide"):
                 sys.exit("Make Failed...")
 
