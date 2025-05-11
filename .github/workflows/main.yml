@@ -18,7 +18,9 @@ jobs:
       matrix:
         # {os: ubuntu-22.04, host: linux-rpi, suffix: tar.gz}
         map: [{os: windows-2019, host: windows, suffix: exe},
+              {os: windows-2019, host: windows, suffix: zip},
               {os: windows-2019, host: windows-factory, suffix: exe},
+              {os: windows-2019, host: windows-factory, suffix: zip},
               {os: ubuntu-22.04, host: linux, suffix: run},
               {os: ubuntu-22.04, host: linux, suffix: tar.gz},
               {os: macos-13, host: mac, suffix: dmg}]
@@ -179,26 +181,40 @@ jobs:
         tar -xzvf qt-raspi.tar.gz
 
     - name: '🏗 Build IDE on Windows'
-      if: matrix.map.host == 'windows'
+      if: matrix.map.host == 'windows' && matrix.map.suffix == 'exe'
       env:
         SM_HOST: ${{ secrets.SM_HOST }}
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: |
-        python make.py
-        python make.py --no-build-installer
+      run: python make.py
+    
+    - name: '🏗 Build IDE on Windows'
+      if: matrix.map.host == 'windows' && matrix.map.suffix == 'zip'
+      env:
+        SM_HOST: ${{ secrets.SM_HOST }}
+        SM_API_KEY: ${{ secrets.SM_API_KEY }}
+        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+        SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
+      run: python make.py --no-build-installer
 
     - name: '🏗 Build IDE on Windows'
-      if: matrix.map.host == 'windows-factory'
+      if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'exe'
       env:
         SM_HOST: ${{ secrets.SM_HOST }}
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: |
-        python make.py --factory
-        python make.py --factory --no-build-installer
+      run: python make.py --factory
+
+    - name: '🏗 Build IDE on Windows'
+      if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'zip'
+      env:
+        SM_HOST: ${{ secrets.SM_HOST }}
+        SM_API_KEY: ${{ secrets.SM_API_KEY }}
+        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+        SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
+      run: python make.py --factory --no-build-installer
 
     - name: '🏗 Build IDE on Linux .run'
       if: matrix.map.host == 'linux' && matrix.map.suffix == 'run'
@@ -236,7 +252,7 @@ jobs:
         if-no-files-found: error
 
     - name: '⬆ Upload zip'
-      if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || ((matrix.map.host == 'linux') && (matrix.map.suffix == 'run')))
+      if: github.event_name != 'pull_request' && ((matrix.map.host == 'linux') && (matrix.map.suffix == 'run'))
       uses: actions/upload-artifact@v4
       with:
         name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}-zip
