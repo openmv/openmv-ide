@@ -311,6 +311,11 @@ jobs:
     permissions:
       contents: write
     steps:
+    - name: '⏳ Checkout repository'
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
     - name: '🧹 Delete old release'
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
       with:
