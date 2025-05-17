@@ -393,6 +393,8 @@ jobs:
       run: |
         for EXT in zip tar.gz run exe dmg; do
           gh run download -p artifact-*-$EXT
-          gh release upload development artifact-*-$EXT/artifact-*-$EXT --clobber
+          ls -al
+          ls -al artifact-*-$EXT/
+          gh release upload development artifact-*-$EXT/* --clobber
           rm -rf artifact-*-$EXT
         done
