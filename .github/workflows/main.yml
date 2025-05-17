@@ -184,7 +184,7 @@ jobs:
       if: matrix.map.host == 'windows' && matrix.map.suffix == 'exe'
       run: |
         mkdir build
-        touch build/openmv-ide-test-${{matrix.map.suffix}}
+        echo "Test" > build/openmv-ide-test-${{matrix.map.suffix}}
 
     # - name: '🏗 Build IDE on Windows'
     #   if: matrix.map.host == 'windows' && matrix.map.suffix == 'exe'
@@ -199,7 +199,7 @@ jobs:
       if: matrix.map.host == 'windows' && matrix.map.suffix == 'zip'
       run:  |
         mkdir build
-        touch build/openmv-ide-test-${{matrix.map.suffix}}
+        echo "Test" > build/openmv-ide-test-${{matrix.map.suffix}}
 
     # - name: '🏗 Build IDE on Windows'
     #   if: matrix.map.host == 'windows' && matrix.map.suffix == 'zip'
@@ -214,7 +214,7 @@ jobs:
       if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'exe'
       run:  |
         mkdir build
-        touch build/openmv-ide-test-factory-${{matrix.map.suffix}}
+        echo "Test" > build/openmv-ide-test-factory-${{matrix.map.suffix}}
 
     # - name: '🏗 Build IDE on Windows'
     #   if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'exe'
@@ -229,7 +229,7 @@ jobs:
       if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'zip'
       run:  |
         mkdir build
-        touch build/openmv-ide-test-factory-${{matrix.map.suffix}}
+        echo "Test" > build/openmv-ide-test-factory-${{matrix.map.suffix}}
 
     # - name: '🏗 Build IDE on Windows'
     #   if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'zip'
@@ -244,7 +244,7 @@ jobs:
       if: matrix.map.host == 'linux' && matrix.map.suffix == 'run'
       run:  |
         mkdir build
-        touch build/openmv-ide-test-${{matrix.map.suffix}}
+        echo "Test" > build/openmv-ide-test-${{matrix.map.suffix}}
 
     # - name: '🏗 Build IDE on Linux .run'
     #   if: matrix.map.host == 'linux' && matrix.map.suffix == 'run'
@@ -261,7 +261,7 @@ jobs:
       if: matrix.map.host == 'linux' && matrix.map.suffix == 'tar.gz'
       run:  |
         mkdir build
-        touch build/openmv-ide-test-${{matrix.map.suffix}}
+        echo "Test" > build/openmv-ide-test-${{matrix.map.suffix}}
 
     # - name: '🏗 Build IDE on Linux .tar.gz'
     #   if: matrix.map.host == 'linux' && matrix.map.suffix == 'tar.gz'
@@ -275,7 +275,7 @@ jobs:
       if: matrix.map.host == 'mac'
       run:  |
         mkdir build
-        touch build/openmv-ide-test-${{matrix.map.suffix}}
+        echo "Test" > build/openmv-ide-test-${{matrix.map.suffix}}
 
     # - name: '🏗 Build IDE on Mac'
     #   if: matrix.map.host == 'mac'
