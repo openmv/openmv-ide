@@ -350,7 +350,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         for EXT in zip tar.gz run exe dmg; do
-          gh run download -p "artifact-*-$EXT" -D artifact-$EXT
-          gh release upload development artifact-$EXT/*.$EXT --clobber
-          rm -rf artifact-$EXT
+          gh run download -p artifact-*-$EXT
+          gh release upload development artifact-*-$EXT --clobber
+          rm -rf artifact-*-$EXT
         done
