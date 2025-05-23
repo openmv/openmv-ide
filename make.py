@@ -18,6 +18,54 @@ def search(d0, d1):
 def search_all(d0, d1):
     return [os.path.join(d0, x) for x in os.listdir(d0) if re.search(d1, x)]
 
+def find_tool_in_platform(base_paths, search_sequence, env_var_name, path_separator, bin_subpath="bin"):
+    """
+    Platform-specific tool finding integrated functions
+
+    Args:
+    base_paths: Default paths to search ['/path1', '/path2',...]
+    search_sequence: [('Qt', 'match'), ('5.15.2', 'match'), ('mingw', 'search')]
+    env_var_name: Name of the environment variable, for example 'QTDIR'
+    path_separator: path separator (';' or ':')
+    bin_subpath: bin subpath (default: 'bin', Ninja: '')
+    """
+    for base_path in base_paths:
+        current_path = base_path
+        
+        # Follow the search sequence to navigate the path
+        for pattern, search_type in search_sequence:
+            if search_type == 'match':
+                current_path = match(current_path, pattern)
+            elif search_type == 'search':
+                current_path = search(current_path, pattern)
+            else:  # 'exists' - simple path check
+                potential_path = os.path.join(current_path, pattern)
+                current_path = potential_path if os.path.exists(potential_path) else None
+            
+            if current_path is None:
+                break
+        
+        if current_path and os.path.exists(current_path):
+            # Setting Environmental Variables
+            os.environ[env_var_name] = current_path
+            
+            # PATH update
+            if bin_subpath:
+                bin_path = os.path.join(current_path, bin_subpath)
+            else:
+                bin_path = current_path
+            
+            if os.path.exists(bin_path):
+                current_env_path = os.environ.get("PATH", "")
+                if path_separator == ';':  # Windows
+                    os.environ["PATH"] = current_env_path + path_separator + bin_path
+                else:  # Unix-like
+                    os.environ["PATH"] = bin_path + path_separator + current_env_path
+            
+            return current_path
+    
+    return None
+
 def find_qtdir(rpi):
     if rpi:
         os.environ["QTDIR"] = rpi
@@ -25,218 +73,124 @@ def find_qtdir(rpi):
         os.environ["PATH"] = path + os.environ["PATH"]
         return rpi
     elif sys.platform.startswith('win'):
-        qtdir = match(os.sep, r"Qt")
-        if qtdir:
-            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
-            if qtdir:
-                qtdir = search(qtdir, r"mingw")
-                if qtdir:
-                    os.environ["QTDIR"] = qtdir
-                    path = ';' + os.path.join(qtdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return qtdir
-        qtdir = match(os.path.expanduser('~'), r"Qt")
-        if qtdir:
-            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
-            if qtdir:
-                qtdir = search(qtdir, r"mingw")
-                if qtdir:
-                    os.environ["QTDIR"] = qtdir
-                    path = ';' + os.path.join(qtdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return qtdir
+        base_paths = [os.sep, os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            (r'\d+\.\d+(\.\d+)?', 'match'),
+            ('mingw', 'search')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'QTDIR', ';')
     elif sys.platform.startswith('darwin'):
-        qtdir = match(os.path.expanduser('~'), r"Qt")
-        if qtdir:
-            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
-            if qtdir:
-                qtdir = match(qtdir, r"macos")
-                if qtdir:
-                    os.environ["QTDIR"] = qtdir
-                    path = ':' + os.path.join(qtdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return qtdir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            (r'\d+\.\d+(\.\d+)?', 'match'),
+            ('macos', 'match')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'QTDIR', ':')
     elif sys.platform.startswith('linux'):
-        qtdir = match(os.path.expanduser('~'), r"Qt")
-        if qtdir:
-            qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
-            if qtdir:
-                qtdir = search(qtdir, r"gcc")
-                if qtdir:
-                    os.environ["QTDIR"] = qtdir
-                    path = ':' + os.path.join(qtdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return qtdir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            (r'\d+\.\d+(\.\d+)?', 'match'),
+            ('gcc', 'search')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'QTDIR', ':')
     return None
 
 def find_mingwdir():
     if sys.platform.startswith('win'):
-        mingwdir = match(os.sep, r"Qt")
-        if mingwdir:
-            mingwdir = match(mingwdir, r"Tools")
-            if mingwdir:
-                mingwdir = search(mingwdir, r"mingw")
-                if mingwdir:
-                    os.environ["MINGWDIR"] = mingwdir
-                    path = ';' + os.path.join(mingwdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return mingwdir
-        mingwdir = match(os.path.expanduser('~'), r"Qt")
-        if mingwdir:
-            mingwdir = match(mingwdir, r"Tools")
-            if mingwdir:
-                mingwdir = search(mingwdir, r"mingw")
-                if mingwdir:
-                    os.environ["MINGWDIR"] = mingwdir
-                    path = ';' + os.path.join(mingwdir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return mingwdir
+        base_paths = [os.sep, os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('mingw', 'search')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'MINGWDIR', ';')
     return None
 
 def find_cmakedir():
     if sys.platform.startswith('win'):
-        cmakedir = match(os.sep, r"Qt")
-        if cmakedir:
-            cmakedir = match(cmakedir, r"Tools")
-            if cmakedir:
-                cmakedir = search(cmakedir, r"CMake")
-                if cmakedir:
-                    os.environ["CMAKEDIR"] = cmakedir
-                    path = ';' + os.path.join(cmakedir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return cmakedir
-        cmakedir = match(os.path.expanduser('~'), r"Qt")
-        if cmakedir:
-            cmakedir = match(cmakedir, r"Tools")
-            if cmakedir:
-                cmakedir = search(cmakedir, r"CMake")
-                if cmakedir:
-                    os.environ["CMAKEDIR"] = cmakedir
-                    path = ';' + os.path.join(cmakedir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return cmakedir
+        base_paths = [os.sep, os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('CMake', 'search')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'CMAKEDIR', ';')
     elif sys.platform.startswith('darwin'):
-        cmakedir = match(os.path.expanduser('~'), r"Qt")
-        if cmakedir:
-            cmakedir = match(cmakedir, r"Tools")
-            if cmakedir:
-                cmakedir = match(cmakedir, r"CMake")
-                if cmakedir:
-                    cmakedir = match(cmakedir, r"CMake.app")
-                    if cmakedir:
-                        cmakedir = match(cmakedir, r"Contents")
-                        if cmakedir:
-                            os.environ["CMAKEDIR"] = cmakedir
-                            path = ':' + os.path.join(cmakedir, "bin")
-                            os.environ["PATH"] = os.environ["PATH"] + path
-                            return cmakedir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('CMake', 'match'),
+            ('CMake.app', 'match'),
+            ('Contents', 'match')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'CMAKEDIR', ':')
     elif sys.platform.startswith('linux'):
-        cmakedir = match(os.path.expanduser('~'), r"Qt")
-        if cmakedir:
-            cmakedir = match(cmakedir, r"Tools")
-            if cmakedir:
-                cmakedir = search(cmakedir, r"CMake")
-                if cmakedir:
-                    os.environ["CMAKEDIR"] = cmakedir
-                    path = ':' + os.path.join(cmakedir, "bin")
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return cmakedir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('CMake', 'search')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'CMAKEDIR', ':')
     return None
 
 def find_ninjadir():
     if sys.platform.startswith('win'):
-        ninjadir = match(os.sep, r"Qt")
-        if ninjadir:
-            ninjadir = match(ninjadir, r"Tools")
-            if ninjadir:
-                ninjadir = match(ninjadir, r"Ninja")
-                if ninjadir:
-                    os.environ["NINJADIR"] = ninjadir
-                    path = ';' + ninjadir
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return ninjadir
-        ninjadir = match(os.path.expanduser('~'), r"Qt")
-        if ninjadir:
-            ninjadir = match(ninjadir, r"Tools")
-            if ninjadir:
-                ninjadir = match(ninjadir, r"Ninja")
-                if ninjadir:
-                    os.environ["NINJADIR"] = ninjadir
-                    path = ';' + ninjadir
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return ninjadir
+        base_paths = [os.sep, os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('Ninja', 'match')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'NINJADIR', ';', bin_subpath='')
     elif sys.platform.startswith('darwin'):
-        ninjadir = match(os.path.expanduser('~'), r"Qt")
-        if ninjadir:
-            ninjadir = match(ninjadir, r"Tools")
-            if ninjadir:
-                ninjadir = match(ninjadir, r"Ninja")
-                if ninjadir:
-                    os.environ["NINJADIR"] = ninjadir
-                    path = ':' + ninjadir
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return ninjadir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('Ninja', 'match')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'NINJADIR', ':', bin_subpath='')
     elif sys.platform.startswith('linux'):
-        ninjadir = match(os.path.expanduser('~'), r"Qt")
-        if ninjadir:
-            ninjadir = match(ninjadir, r"Tools")
-            if ninjadir:
-                ninjadir = match(ninjadir, r"Ninja")
-                if ninjadir:
-                    os.environ["NINJADIR"] = ninjadir
-                    path = ':' + ninjadir
-                    os.environ["PATH"] = os.environ["PATH"] + path
-                    return ninjadir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('Ninja', 'match')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'NINJADIR', ':', bin_subpath='')
     return None
 
 def find_ifdir():
     if sys.platform.startswith('win'):
-        ifdir = match(os.sep, r"Qt")
-        if ifdir:
-            ifdir = match(ifdir, r"Tools")
-            if ifdir:
-                ifdir = match(ifdir, r"QtInstallerFramework")
-                if ifdir:
-                    ifdir = match(ifdir, r"\d+\.\d+(\.\d+)?")
-                    if ifdir:
-                        os.environ["IFDIR"] = ifdir
-                        path = ';' + os.path.join(ifdir, "bin")
-                        os.environ["PATH"] = os.environ["PATH"] + path
-                        return ifdir
-        ifdir = match(os.path.expanduser('~'), r"Qt")
-        if ifdir:
-            ifdir = match(ifdir, r"Tools")
-            if ifdir:
-                ifdir = match(ifdir, r"QtInstallerFramework")
-                if ifdir:
-                    ifdir = match(ifdir, r"\d+\.\d+(\.\d+)?")
-                    if ifdir:
-                        os.environ["IFDIR"] = ifdir
-                        path = ';' + os.path.join(ifdir, "bin")
-                        os.environ["PATH"] = os.environ["PATH"] + path
-                        return ifdir
+        base_paths = [os.sep, os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('QtInstallerFramework', 'match'),
+            (r'\d+\.\d+(\.\d+)?', 'match')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'IFDIR', ';')
     elif sys.platform.startswith('darwin'):
-        ifdir = match(os.path.expanduser('~'), r"Qt")
-        if ifdir:
-            ifdir = search(ifdir, r"QtIFW")
-            if ifdir:
-                os.environ["IFDIR"] = ifdir
-                path = ':' + os.path.join(ifdir, "bin")
-                os.environ["PATH"] = os.environ["PATH"] + path
-                return ifdir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('QtIFW', 'search')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'IFDIR', ':')
     elif sys.platform.startswith('linux'):
-        ifdir = match(os.path.expanduser('~'), r"Qt")
-        if ifdir:
-            ifdir = match(ifdir, r"Tools")
-            if ifdir:
-                ifdir = match(ifdir, r"QtInstallerFramework")
-                if ifdir:
-                    ifdir = match(ifdir, r"\d+\.\d+(\.\d+)?")
-                    if ifdir:
-                        os.environ["IFDIR"] = ifdir
-                        path = ':' + os.path.join(ifdir, "bin")
-                        os.environ["PATH"] = os.environ["PATH"] + path
-                        return ifdir
+        base_paths = [os.path.expanduser('~')]
+        search_sequence = [
+            ('Qt', 'match'),
+            ('Tools', 'exists'),
+            ('QtInstallerFramework', 'match'),
+            (r'\d+\.\d+(\.\d+)?', 'match')
+        ]
+        return find_tool_in_platform(base_paths, search_sequence, 'IFDIR', ':')
     return None
 
 def find_windowssdkdir():
