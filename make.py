@@ -57,10 +57,7 @@ def find_tool_in_platform(base_paths, search_sequence, env_var_name, path_separa
             
             if os.path.exists(bin_path):
                 current_env_path = os.environ.get("PATH", "")
-                if path_separator == ';':  # Windows
-                    os.environ["PATH"] = current_env_path + path_separator + bin_path
-                else:  # Unix-like
-                    os.environ["PATH"] = bin_path + path_separator + current_env_path
+                os.environ["PATH"] = current_env_path + path_separator + bin_path
             
             return current_path
     
