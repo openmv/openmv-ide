@@ -306,9 +306,9 @@ jobs:
         done
 
     - name: '🧹 Remove artifacts'
-      uses: geekyeggo/delete-artifact@v2
+      uses: geekyeggo/delete-artifact@v5
       with:
-        name: 'artifact-*'
+        name: '*'
         failOnError: false
 
   development-release:
@@ -363,7 +363,7 @@ jobs:
         done
 
     - name: '🧹 Remove artifacts'
-      uses: geekyeggo/delete-artifact@v2
+      uses: geekyeggo/delete-artifact@v5
       with:
-        name: 'artifact-*'
+        name: '*'
         failOnError: false
