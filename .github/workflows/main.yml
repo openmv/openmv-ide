@@ -17,10 +17,10 @@ jobs:
     strategy:
       matrix:
         # {os: ubuntu-22.04, host: linux-rpi, suffix: tar.gz}
-        map: [{os: windows-2019, host: windows, suffix: exe},
-              {os: windows-2019, host: windows, suffix: zip},
-              {os: windows-2019, host: windows-factory, suffix: exe},
-              {os: windows-2019, host: windows-factory, suffix: zip},
+        map: [{os: windows-2025, host: windows, suffix: exe},
+              {os: windows-2025, host: windows, suffix: zip},
+              {os: windows-2025, host: windows-factory, suffix: exe},
+              {os: windows-2025, host: windows-factory, suffix: zip},
               {os: ubuntu-22.04, host: linux, suffix: run},
               {os: ubuntu-22.04, host: linux, suffix: tar.gz},
               {os: macos-13, host: mac, suffix: dmg}]
