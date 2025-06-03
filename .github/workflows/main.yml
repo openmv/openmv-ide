@@ -49,7 +49,7 @@ jobs:
 
     - name: '❖ Install Windows Certificates (2/3)'
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-      uses: digicert/ssm-code-signing@v0.0.2
+      uses: digicert/ssm-code-signing@v1.0.0
 
     - name: '❖ Install Windows Certificates (3/3)'
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
