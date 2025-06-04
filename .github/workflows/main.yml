@@ -35,94 +35,94 @@ jobs:
       with:
         submodules: recursive
   
-    # - name: '❖ Install Windows Certificates (1/3)'
-    #   if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-    #   env:
-    #       SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
-    #   run: |
-    #     CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
-    #     echo "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $CERTIFICATE_PATH
-    #     echo "SM_CLIENT_CERT_FILE=$CERTIFICATE_PATH" >> "$GITHUB_ENV"
-    #     echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
-    #     echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
-    #   shell: bash
+    - name: '❖ Install Windows Certificates (1/3)'
+      if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
+      env:
+          SM_CLIENT_CERT_FILE_B64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
+      run: |
+        CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+        echo "$SM_CLIENT_CERT_FILE_B64" | base64 --decode > $CERTIFICATE_PATH
+        echo "SM_CLIENT_CERT_FILE=$CERTIFICATE_PATH" >> "$GITHUB_ENV"
+        echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
+        echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
+      shell: bash
 
-    # - name: '❖ Install Windows Certificates (2/3)'
-    #   if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-    #   uses: digicert/ssm-code-signing@v1.0.0
+    - name: '❖ Install Windows Certificates (2/3)'
+      if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
+      uses: digicert/ssm-code-signing@v1.0.0
 
-    # - name: '❖ Install Windows Certificates (3/3)'
-    #   if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-    #   env:
-    #     SM_API_KEY: ${{ secrets.SM_API_KEY }}
-    #   run: smctl windows certsync --keypair-alias=$SM_API_KEY
+    - name: '❖ Install Windows Certificates (3/3)'
+      if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
+      env:
+        SM_API_KEY: ${{ secrets.SM_API_KEY }}
+      run: smctl windows certsync --keypair-alias=$SM_API_KEY
 
-    # - name: '🍏 Install Apple Certificates'
-    #   if: matrix.map.host == 'mac'
-    #   env:
-    #       APPLICATION_CERTIFICATE_BASE64: ${{ secrets.MAC_APPLICATION_CER }}
-    #       APPLICATION_P12_PASSWORD: ${{ secrets.MAC_APPLICATION_CER_PASSWORD }}
-    #       INSTALLER_CERTIFICATE_BASE64: ${{ secrets.MAC_INSTALLER_CER }}
-    #       INSTALLER_P12_PASSWORD: ${{ secrets.MAC_INSTALLER_CER_PASSWORD }}
-    #       KEYCHAIN_PASSWORD: ${{ secrets.MAC_KEYCHAIN_PASSWORD }}
-    #       APPLE_ID: ${{ secrets.MAC_APPLE_ID }}
-    #       TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
-    #       NOTARYTOOL_PASSWORD: ${{ secrets.MAC_2FA_PASSWORD }}
-    #   run: |
-    #     KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-    #     APPLICATION_CERTIFICATE_PATH=$RUNNER_TEMP/application_certificate.p12
-    #     INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
-    #     echo -n "$APPLICATION_CERTIFICATE_BASE64" | base64 --decode -o $APPLICATION_CERTIFICATE_PATH
-    #     echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
-    #     security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-    #     security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-    #     security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-    #     security import $APPLICATION_CERTIFICATE_PATH -P "$APPLICATION_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-    #     security import $INSTALLER_CERTIFICATE_PATH -P "$INSTALLER_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-    #     security list-keychain -d user -s $KEYCHAIN_PATH
-    #     xcrun notarytool store-credentials "AC_PASSWORD" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
+    - name: '🍏 Install Apple Certificates'
+      if: matrix.map.host == 'mac'
+      env:
+          APPLICATION_CERTIFICATE_BASE64: ${{ secrets.MAC_APPLICATION_CER }}
+          APPLICATION_P12_PASSWORD: ${{ secrets.MAC_APPLICATION_CER_PASSWORD }}
+          INSTALLER_CERTIFICATE_BASE64: ${{ secrets.MAC_INSTALLER_CER }}
+          INSTALLER_P12_PASSWORD: ${{ secrets.MAC_INSTALLER_CER_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.MAC_KEYCHAIN_PASSWORD }}
+          APPLE_ID: ${{ secrets.MAC_APPLE_ID }}
+          TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+          NOTARYTOOL_PASSWORD: ${{ secrets.MAC_2FA_PASSWORD }}
+      run: |
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        APPLICATION_CERTIFICATE_PATH=$RUNNER_TEMP/application_certificate.p12
+        INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
+        echo -n "$APPLICATION_CERTIFICATE_BASE64" | base64 --decode -o $APPLICATION_CERTIFICATE_PATH
+        echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security import $APPLICATION_CERTIFICATE_PATH -P "$APPLICATION_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security import $INSTALLER_CERTIFICATE_PATH -P "$INSTALLER_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+        xcrun notarytool store-credentials "AC_PASSWORD" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$NOTARYTOOL_PASSWORD"
 
-    # - name: '⬇ Install Qt on Windows'
-    #   if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-    #   uses: jurplel/install-qt-action@v3
-    #   with:
-    #     aqtversion: '==3.1.*'
-    #     version: '6.5.1'
-    #     host: 'windows'
-    #     target: 'desktop'
-    #     arch: 'win64_mingw'
-    #     dir: 'C:\Users\runneradmin'
-    #     modules: 'qtimageformats qtserialport qt5compat'
-    #     cache: true
-    #     tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
+    - name: '⬇ Install Qt on Windows'
+      if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: '6.5.1'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_mingw'
+        dir: 'C:\Users\runneradmin'
+        modules: 'qtimageformats qtserialport qt5compat'
+        cache: true
+        tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
 
-    # - name: '⬇ Install Qt on Linux'
-    #   if: matrix.map.host == 'linux'
-    #   uses: jurplel/install-qt-action@v3
-    #   with:
-    #     aqtversion: '==3.1.*'
-    #     version: '6.5.1'
-    #     host: 'linux'
-    #     target: 'desktop'
-    #     arch: 'gcc_64'
-    #     dir: '/home/runner'
-    #     modules: 'qtimageformats qtserialport qt5compat'
-    #     cache: true
-    #     tools: 'tools_cmake tools_ifw tools_ninja'
+    - name: '⬇ Install Qt on Linux'
+      if: matrix.map.host == 'linux'
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: '6.5.1'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        dir: '/home/runner'
+        modules: 'qtimageformats qtserialport qt5compat'
+        cache: true
+        tools: 'tools_cmake tools_ifw tools_ninja'
 
-    # - name: '⬇ Install Qt on Mac'
-    #   if: matrix.map.host == 'mac'
-    #   uses: jurplel/install-qt-action@v3
-    #   with:
-    #     aqtversion: '==3.1.*'
-    #     version: '6.5.1'
-    #     host: 'mac'
-    #     target: 'desktop'
-    #     arch: 'clang_64'
-    #     dir: '/Users/runner'
-    #     modules: 'qtimageformats qtserialport qt5compat'
-    #     cache: true
-    #     tools: 'tools_cmake tools_ninja'
+    - name: '⬇ Install Qt on Mac'
+      if: matrix.map.host == 'mac'
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: '6.5.1'
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        dir: '/Users/runner'
+        modules: 'qtimageformats qtserialport qt5compat'
+        cache: true
+        tools: 'tools_cmake tools_ninja'
 
     - name: '⬇ Install Qt Cross-Compile for Raspberry Pi'
       if: matrix.map.host == 'linux-rpi'
@@ -187,10 +187,7 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      # run: python make.py
-      run: |
-        mkdir build
-        echo "Test" > build/openmv-ide-test.${{matrix.map.suffix}}
+      run: python make.py
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows' && matrix.map.suffix == 'zip'
@@ -199,10 +196,7 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      # run: python make.py --no-build-installer
-      run:  |
-        mkdir build
-        echo "Test" > build/openmv-ide-test.${{matrix.map.suffix}}
+      run: python make.py --no-build-installer
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'exe'
@@ -211,10 +205,7 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      # run: python make.py --factory
-      run: |
-        mkdir build
-        echo "Test" > build/openmv-ide-factory-test.${{matrix.map.suffix}}
+      run: python make.py --factory
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'zip'
@@ -223,43 +214,30 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      # run: python make.py --factory --no-build-installer
-      run: |
-        mkdir build
-        echo "Test" > build/openmv-ide-factory-test.${{matrix.map.suffix}}
+      run: python make.py --factory --no-build-installer
 
     - name: '🏗 Build IDE on Linux .run'
       if: matrix.map.host == 'linux' && matrix.map.suffix == 'run'
       env:
         MAKE_ARGS: ${{ matrix.map.make_args }}
-      # run: |
-      #   sudo apt-get install -y chrpath
-      #   python make.py
-      #   version=$(ls build | grep -oP 'openmv-ide-linux-x86_64-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.run)')
-      #   cd qt-creator/share/qtcreator
-      #   zip -r ../../../build/openmv-ide-resources-${version}.zip examples firmware html models    
       run: |
-        mkdir build
-        echo "Test" > build/openmv-ide-test.${{matrix.map.suffix}}
-        echo "Test" > build/openmv-ide-resources.zip
+        sudo apt-get install -y chrpath
+        python make.py
+        version=$(ls build | grep -oP 'openmv-ide-linux-x86_64-\K[0-9]+\.[0-9]+\.[0-9]+(?=\.run)')
+        cd qt-creator/share/qtcreator
+        zip -r ../../../build/openmv-ide-resources-${version}.zip examples firmware html models
 
     - name: '🏗 Build IDE on Linux .tar.gz'
       if: matrix.map.host == 'linux' && matrix.map.suffix == 'tar.gz'
       env:
         MAKE_ARGS: ${{ matrix.map.make_args }}
-      # run: |
-      #   sudo apt-get install -y chrpath
-      #   python make.py --no-build-installer
       run: |
-        mkdir build
-        echo "Test" > build/openmv-ide-test.${{matrix.map.suffix}}
+        sudo apt-get install -y chrpath
+        python make.py --no-build-installer
 
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac'
-      # run: python make.py
-      run: |
-        mkdir build
-        echo "Test" > build/openmv-ide-test.${{matrix.map.suffix}}
+      run: python make.py
 
     - name: '🏗 Build IDE on Linux for Raspberry Pi'
       if: matrix.map.host == 'linux-rpi'
@@ -281,14 +259,14 @@ jobs:
         path: 'build/openmv-*.zip'
         if-no-files-found: error
 
-    # - name: '❖ Remove Windows Certificates'
-    #   if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-    #   run: rm $SM_CLIENT_CERT_FILE
-    #   shell: bash
+    - name: '❖ Remove Windows Certificates'
+      if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
+      run: rm $SM_CLIENT_CERT_FILE
+      shell: bash
 
-    # - name: '🍏 Remove Apple Certificates'
-    #   if: matrix.map.host == 'mac'
-    #   run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+    - name: '🍏 Remove Apple Certificates'
+      if: matrix.map.host == 'mac'
+      run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
 
   stable-release:
     needs: build
@@ -322,11 +300,27 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ACTIONS_STEP_DEBUG: true
       run: |
+        echo "ARTIFACT_NAMES=" >> $GITHUB_ENV
         for EXT in zip tar.gz run exe dmg; do
-          gh run download ${{ github.run_id }} -p artifact-*-$EXT
+          ARTIFACT_PATTERN=artifact-*-$EXT
+
+          echo "Downloading artifacts matching: $ARTIFACT_PATTERN"
+          gh run download ${{ github.run_id }} -p "$ARTIFACT_PATTERN"
+    
+          echo "Uploading to release..."
           gh release upload ${{ github.ref_name }} artifact-*-$EXT/* --clobber
+    
+          for dir in artifact-*-$EXT; do
+            echo "Found artifact dir: $dir"
+            echo "${dir}" >> artifact_names.txt
+          done
+    
           rm -rf artifact-*-$EXT
         done
+
+        echo "ARTIFACT_NAMES<<EOF" >> $GITHUB_ENV
+        cat artifact_names.txt >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     - name: '🧹 Remove artifacts'
       uses: geekyeggo/delete-artifact@v5
@@ -380,14 +374,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ACTIONS_STEP_DEBUG: true
       run: |
-        # for EXT in zip tar.gz run exe dmg; do
-        #   gh run download ${{ github.run_id }} -p artifact-*-$EXT
-        #   gh release upload development artifact-*-$EXT/* --clobber
-        #   rm -rf artifact-*-$EXT
-        # done
         echo "ARTIFACT_NAMES=" >> $GITHUB_ENV
         for EXT in zip tar.gz run exe dmg; do
           ARTIFACT_PATTERN=artifact-*-$EXT
+
           echo "Downloading artifacts matching: $ARTIFACT_PATTERN"
           gh run download ${{ github.run_id }} -p "$ARTIFACT_PATTERN"
     
