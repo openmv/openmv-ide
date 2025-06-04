@@ -323,7 +323,7 @@ jobs:
         ACTIONS_STEP_DEBUG: true
       run: |
         for EXT in zip tar.gz run exe dmg; do
-          gh run download --run-id ${{ github.run_id }} -p artifact-*-$EXT
+          gh run download ${{ github.run_id }} -p artifact-*-$EXT
           gh release upload ${{ github.ref_name }} artifact-*-$EXT/* --clobber
           rm -rf artifact-*-$EXT
         done
@@ -386,7 +386,7 @@ jobs:
         ACTIONS_STEP_DEBUG: true
       run: |
         for EXT in zip tar.gz run exe dmg; do
-          gh run download --run-id ${{ github.run_id }} -p artifact-*-$EXT
+          gh run download ${{ github.run_id }} -p artifact-*-$EXT
           gh release upload development artifact-*-$EXT/* --clobber
           rm -rf artifact-*-$EXT
         done
