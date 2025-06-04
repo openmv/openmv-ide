@@ -49,7 +49,7 @@ jobs:
 
     - name: '❖ Install Windows Certificates (2/3)'
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-      uses: digicert/ssm-code-signing@v1.0.0
+      uses: digicert/ssm-code-signing@v1.0.1
 
     - name: '❖ Install Windows Certificates (3/3)'
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
@@ -84,9 +84,9 @@ jobs:
 
     - name: '⬇ Install Qt on Windows'
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
-        aqtversion: '==3.1.*'
+        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
         version: '6.5.1'
         host: 'windows'
         target: 'desktop'
@@ -98,9 +98,9 @@ jobs:
 
     - name: '⬇ Install Qt on Linux'
       if: matrix.map.host == 'linux'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
-        aqtversion: '==3.1.*'
+        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
         version: '6.5.1'
         host: 'linux'
         target: 'desktop'
@@ -112,9 +112,9 @@ jobs:
 
     - name: '⬇ Install Qt on Mac'
       if: matrix.map.host == 'mac'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
-        aqtversion: '==3.1.*'
+        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
         version: '6.5.1'
         host: 'mac'
         target: 'desktop'
