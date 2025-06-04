@@ -329,15 +329,10 @@ jobs:
         done
 
     - name: '🧹 Remove artifacts'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ACTIONS_STEP_DEBUG: true
-      run: |
-        artifacts=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[].name')
-        for name in $artifacts; do
-          echo "Deleting artifact: $name"
-          gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq ".artifacts[] | select(.name==\"$name\") | .id")
-        done
+      uses: geekyeggo/delete-artifact@v5
+      with:
+        name: ${{ env.ARTIFACT_NAMES }}
+        failOnError: false
 
   development-release:
     needs: build
@@ -385,19 +380,34 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ACTIONS_STEP_DEBUG: true
       run: |
+        # for EXT in zip tar.gz run exe dmg; do
+        #   gh run download ${{ github.run_id }} -p artifact-*-$EXT
+        #   gh release upload development artifact-*-$EXT/* --clobber
+        #   rm -rf artifact-*-$EXT
+        # done
+        echo "ARTIFACT_NAMES=" >> $GITHUB_ENV
         for EXT in zip tar.gz run exe dmg; do
-          gh run download ${{ github.run_id }} -p artifact-*-$EXT
+          ARTIFACT_PATTERN=artifact-*-$EXT
+          echo "Downloading artifacts matching: $ARTIFACT_PATTERN"
+          gh run download ${{ github.run_id }} -p "$ARTIFACT_PATTERN"
+    
+          echo "Uploading to release..."
           gh release upload development artifact-*-$EXT/* --clobber
+    
+          for dir in artifact-*-$EXT; do
+            echo "Found artifact dir: $dir"
+            echo "${dir}" >> artifact_names.txt
+          done
+    
           rm -rf artifact-*-$EXT
         done
 
+        echo "ARTIFACT_NAMES<<EOF" >> $GITHUB_ENV
+        cat artifact_names.txt >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
     - name: '🧹 Remove artifacts'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ACTIONS_STEP_DEBUG: true
-      run: |
-        artifacts=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[].name')
-        for name in $artifacts; do
-          echo "Deleting artifact: $name"
-          gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq ".artifacts[] | select(.name==\"$name\") | .id")
-        done
+      uses: geekyeggo/delete-artifact@v5
+      with:
+        name: ${{ env.ARTIFACT_NAMES }}
+        failOnError: false
