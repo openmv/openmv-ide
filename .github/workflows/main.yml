@@ -21,8 +21,8 @@ jobs:
               {os: windows-2022, host: windows, suffix: zip},
               {os: windows-2022, host: windows-factory, suffix: exe},
               {os: windows-2022, host: windows-factory, suffix: zip},
-              {os: ubuntu-22.04, host: linux, suffix: run},
-              {os: ubuntu-22.04, host: linux, suffix: tar.gz},
+              {os: ubuntu-22.04-large, host: linux, suffix: run},
+              {os: ubuntu-22.04-large, host: linux, suffix: tar.gz},
               {os: macos-14, host: mac, suffix: dmg}]
       fail-fast: false
     steps:
