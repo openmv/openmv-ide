@@ -327,11 +327,11 @@ def make():
     cxx_flags_init = ""
 
     if args.factory:
+        cxx_flags_init += "-DOPENMV_FACTORY_IDE "
         cxx_flags_init += "-DFORCE_FORM_KEY_DIALOG "
         cxx_flags_init += "-DFORCE_AUTO_CONNECT "
         cxx_flags_init += "-DFORCE_AUTO_UPDATE=release "
         cxx_flags_init += "-DFORCE_AUTO_RUN "
-        cxx_flags_init += "-DFORCE_OVERRIDE_READ_TIMEOUT=3000 "
 
     if args.rpi:
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
