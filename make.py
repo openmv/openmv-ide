@@ -540,7 +540,7 @@ def make():
             with open(os.path.join(installdir, "setup.sh"), 'w') as f:
                 f.write("#! /bin/sh\n\n")
                 f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
-                f.write("sudo apt-get install -y libfontconfig1 libfreetype6 libxcb1 libxcb-glx0 libxcb-keysyms1 libxcb-image0 libxcb-shm0 libxcb-icccm4 libxcb-xfixes0 libxcb-shape0 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 build-essential\n")
+                f.write("sudo apt-get install -y libfontconfig1 libfreetype6 libxcb1 libxcb-glx0 libxcb-keysyms1 libxcb-image0 libxcb-shm0 libxcb-icccm4 libxcb-xfixes0 libxcb-shape0 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-cursor0 build-essential\n")
                 f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip python3-usb\n")
                 f.write("sudo cp $DIR/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/\n")
                 f.write("sudo udevadm trigger\n")
