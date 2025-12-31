@@ -325,7 +325,6 @@ def make():
         os.mkdir(installdir)
 
     cxx_flags_init = ""
-
     if args.factory:
         cxx_flags_init += "-DOPENMV_FACTORY_IDE "
         cxx_flags_init += "-DFORCE_FORM_KEY_DIALOG "
@@ -467,7 +466,7 @@ def make():
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('darwin'):
-        installer_name = "openmv-ide-mac-" + ideversion + ".dmg"
+        installer_name = "openmv-ide-mac-arm-" + ideversion + ".dmg"
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         if not args.no_build_application:
             if os.system("cd " + builddir +

@@ -23,7 +23,7 @@ jobs:
               {os: windows-2022, host: windows-factory, suffix: zip},
               {os: ubuntu-22.04-large, host: linux, suffix: run},
               {os: ubuntu-22.04-large, host: linux, suffix: tar.gz},
-              {os: macos-14, host: mac, suffix: dmg}]
+              {os: macos-14, host: mac-arm, suffix: dmg}]
       fail-fast: false
     steps:
     - name: '❖ Fix default line endings on Windows'
@@ -58,7 +58,7 @@ jobs:
       run: smctl windows certsync --keypair-alias=$SM_API_KEY
 
     - name: '🍏 Install Apple Certificates'
-      if: matrix.map.host == 'mac'
+      if: matrix.map.host == 'mac-arm'
       env:
           APPLICATION_CERTIFICATE_BASE64: ${{ secrets.MAC_APPLICATION_CER }}
           APPLICATION_P12_PASSWORD: ${{ secrets.MAC_APPLICATION_CER_PASSWORD }}
@@ -111,7 +111,7 @@ jobs:
         tools: 'tools_cmake tools_ifw tools_ninja'
 
     - name: '⬇ Install Qt on Mac'
-      if: matrix.map.host == 'mac'
+      if: matrix.map.host == 'mac-arm'
       uses: jurplel/install-qt-action@v4
       with:
         aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
@@ -236,7 +236,7 @@ jobs:
         python make.py --no-build-installer
 
     - name: '🏗 Build IDE on Mac'
-      if: matrix.map.host == 'mac'
+      if: matrix.map.host == 'mac-arm'
       run: python make.py
 
     - name: '🏗 Build IDE on Linux for Raspberry Pi'
@@ -265,7 +265,7 @@ jobs:
       shell: bash
 
     - name: '🍏 Remove Apple Certificates'
-      if: matrix.map.host == 'mac'
+      if: matrix.map.host == 'mac-arm'
       run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
 
   stable-release:
