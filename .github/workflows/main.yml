@@ -23,7 +23,7 @@ jobs:
               {os: windows-2022, host: windows-factory, suffix: zip},
               {os: ubuntu-22.04-large, host: linux, suffix: run},
               {os: ubuntu-22.04-large, host: linux, suffix: tar.gz},
-              {os: macos-14, host: mac-arm, suffix: dmg}]
+              {os: macos-15, host: mac-arm, suffix: dmg}]
       fail-fast: false
     steps:
     - name: '❖ Fix default line endings on Windows'
