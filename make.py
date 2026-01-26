@@ -404,7 +404,7 @@ def make():
     elif sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
-        installer_archive_name = installer_name + "-installer-archive.7z"
+        installer_archive_name = installer_name + "-installer-archive.zip"
         if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator" +
@@ -432,8 +432,8 @@ def make():
         if not args.no_build_installer:
             if os.system("cd " + builddir +
             " && cd install" +
-            " && archivegen ../" + installer_archive_name + " bin lib share" +
-            " && cd .."
+            " && archivegen -f zip ../" + installer_archive_name + " bin lib share" +
+            " && cd .." +
             " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion +
             " -a " + installer_archive_name + " " + installer_name):
