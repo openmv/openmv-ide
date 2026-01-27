@@ -485,8 +485,10 @@ def make():
             " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
             " && codesign --deep -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true" +
             " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
-            " && xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait || true" +
-            " && xcrun stapler staple OpenMV\\ IDE.app || true" +
+            " && ( for i in 1 2 3 4 5; do" +
+            " xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait && ok=1 && break;" +
+            " sleep $((i*30));" +
+            " done; [ \"${ok:-0}\" = \"1\" ] && xcrun stapler staple OpenMV\\ IDE.app ) || true" +
             " && rm \"OpenMV IDE.zip\" || true"):
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
@@ -495,8 +497,11 @@ def make():
                 sys.exit("Make Failed...")
         if not args.no_sign_installer:
             if os.system("cd " + builddir +
-            " && xcrun notarytool submit " + installer_name + " --keychain-profile \"AC_PASSWORD\" --wait || true" +
-            " && xcrun stapler staple " + installer_name + " || true"):
+            " && ( for i in 1 2 3 4 5; do" +
+            " xcrun notarytool submit " + installer_name +
+            " --keychain-profile \"AC_PASSWORD\" --wait && ok=1 && break;" +
+            " sleep $((i*30)); " +
+            " done; [ \"${ok:-0}\" = \"1\" ] && xcrun stapler staple " + installer_name + " ) || true"):
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('linux'):
