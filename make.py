@@ -484,28 +484,25 @@ def make():
             if os.system("cd " + builddir +
             " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
             " && ( "
-            "  printf '\\n=== fixup: scan Mach-O + resign if verify fails ===\\n'; "
-            "  find \"OpenMV IDE.app\" -type f -print0 | "
-            "  while IFS= read -r -d '' f; do "
-            "    if file \"$f\" | grep -q 'Mach-O'; then "
-            "      printf '\\n--- codesign pre --- %s\\n' \"$f\"; "
-            "      codesign -dv --verbose=4 \"$f\" 2>&1 | egrep 'Identifier=|TeamIdentifier=|Authority=|Flags=|Runtime|Timestamp=' || true; "
-            "      codesign --verify --strict --verbose=4 \"$f\" >/dev/null 2>&1 || ( "
-            "        printf '\\n--- resign --- %s\\n' \"$f\"; "
-            "        codesign --force --timestamp -s Application \"$f\"; "
-            "        codesign --verify --strict --verbose=4 \"$f\" "
-            "      ); "
-            "    fi; "
-            "  done; "
-            "  printf '\\n--- resign app ---\\n'; "
-            "  codesign --force --options=runtime --timestamp -s Application \"OpenMV IDE.app\"; "
-            "  codesign --verify --deep --strict --verbose=4 \"OpenMV IDE.app\" || true; "
-            ") || true" +
+            " find \"OpenMV IDE.app\" -type f -print0 | while IFS= read -r -d '' f; do "
+            "   file \"$f\" 2>/dev/null | grep -q 'Mach-O' || continue; "
+            "   echo; echo '--- codesign pre ---' \"$f\"; "
+            "   codesign -dv --verbose=4 \"$f\" 2>&1 | egrep 'Identifier=|TeamIdentifier=|Authority=|Flags=|Runtime|Timestamp=' || true; "
+            "   codesign --verify --strict --verbose=4 \"$f\" || ( "
+            "     echo; echo '--- resign ---' \"$f\"; "
+            "     codesign --force --timestamp -s Application \"$f\"; "
+            "     codesign --verify --strict --verbose=4 \"$f\" "
+            "   ); "
+            " done; "
+            " echo; echo '--- resign app ---'; "
+            " codesign --force --options=runtime --timestamp -s Application \"OpenMV IDE.app\"; "
+            " codesign --verify --deep --strict --verbose=4 \"OpenMV IDE.app\" || true; "
+            " ) || true" +
             " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
             " && ( ok=0; for i in 1 2 3 4 5; do "
-            "xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait && ok=1 && break; "
-            "sleep 30; "
-            "done; [ \"$ok\" = \"1\" ] && xcrun stapler staple OpenMV\\ IDE.app ) || true" +
+            " xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait && ok=1 && break; "
+            " sleep 30; "
+            " done; [ \"$ok\" = \"1\" ] && xcrun stapler staple OpenMV\\ IDE.app ) || true" +
             " && rm \"OpenMV IDE.zip\" || true"):
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
