@@ -485,6 +485,7 @@ def make():
             " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
             " && ( "
             "  printf '\\n=== fixup: scan Mach-O + resign if verify fails ===\\n'; "
+            "  find \"OpenMV IDE.app\" -type f -print0 | "
             "  while IFS= read -r -d '' f; do "
             "    if file \"$f\" | grep -q 'Mach-O'; then "
             "      printf '\\n--- codesign pre --- %s\\n' \"$f\"; "
@@ -495,7 +496,7 @@ def make():
             "        codesign --verify --strict --verbose=4 \"$f\" "
             "      ); "
             "    fi; "
-            "  done < <(find \"OpenMV IDE.app\" -type f -print0); "
+            "  done; "
             "  printf '\\n--- resign app ---\\n'; "
             "  codesign --force --options=runtime --timestamp -s Application \"OpenMV IDE.app\"; "
             "  codesign --verify --deep --strict --verbose=4 \"OpenMV IDE.app\" || true; "
