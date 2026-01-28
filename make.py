@@ -484,21 +484,21 @@ def make():
             if os.system("cd " + builddir +
             " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
             " && ( "
-            "f1='OpenMV IDE.app/Contents/Resources/stedgeai/Utilities/macarm/lib/libpython3.9.dylib'; "
-            "f2='OpenMV IDE.app/Contents/Resources/stedgeai/Utilities/macarm/lib/python3.9/config-3.9-darwin/libpython3.9.dylib'; "
-            "f3='OpenMV IDE.app/Contents/Resources/stedgeai/Utilities/macarm/lib/python3.9/config-3.9-darwin/libpython3.9.a'; "
-            "for f in \"$f1\" \"$f2\" \"$f3\"; do "
-            "  echo '--- codesign pre ---' \"$f\"; "
-            "  codesign -dv --verbose=4 \"$f\" 2>&1 | egrep 'Identifier=|TeamIdentifier=|Authority=|Flags=|Runtime|Timestamp=' || true; "
-            "  codesign --verify --strict --verbose=4 \"$f\" || ( "
-            "    echo '--- resign ---' \"$f\"; "
-            "    codesign --force --timestamp -s Application \"$f\"; "
-            "    codesign --verify --strict --verbose=4 \"$f\" "
-            "  ); "
-            "done; "
-            "echo '--- resign app ---'; "
-            "codesign --force --options=runtime --timestamp -s Application \"OpenMV IDE.app\"; "
-            "codesign --verify --deep --strict --verbose=4 \"OpenMV IDE.app\" || true; "
+            "  printf '\\n=== fixup: scan Mach-O + resign if verify fails ===\\n'; "
+            "  while IFS= read -r -d '' f; do "
+            "    if file \"$f\" | grep -q 'Mach-O'; then "
+            "      printf '\\n--- codesign pre --- %s\\n' \"$f\"; "
+            "      codesign -dv --verbose=4 \"$f\" 2>&1 | egrep 'Identifier=|TeamIdentifier=|Authority=|Flags=|Runtime|Timestamp=' || true; "
+            "      codesign --verify --strict --verbose=4 \"$f\" >/dev/null 2>&1 || ( "
+            "        printf '\\n--- resign --- %s\\n' \"$f\"; "
+            "        codesign --force --timestamp -s Application \"$f\"; "
+            "        codesign --verify --strict --verbose=4 \"$f\" "
+            "      ); "
+            "    fi; "
+            "  done < <(find \"OpenMV IDE.app\" -type f -print0); "
+            "  printf '\\n--- resign app ---\\n'; "
+            "  codesign --force --options=runtime --timestamp -s Application \"OpenMV IDE.app\"; "
+            "  codesign --verify --deep --strict --verbose=4 \"OpenMV IDE.app\" || true; "
             ") || true" +
             " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
             " && ( ok=0; for i in 1 2 3 4 5; do "
@@ -551,6 +551,7 @@ def make():
             " -v " + ideversion + " -a " + installer_archive_name +
             " " + installer_name):
                 sys.exit("Make Failed...")
+
         else:
             with open(os.path.join(installdir, "README.txt"), 'w') as f:
                 f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
