@@ -324,6 +324,13 @@ def make():
     if not os.path.exists(installdir):
         os.mkdir(installdir)
 
+    # Ship the GPLv3 (with Qt exception) license that OpenMV IDE is distributed
+    # under alongside the application files (the mac .dmg already includes this
+    # via makedmg.sh). The installer/portable archives are built from installdir,
+    # so dropping it here covers Windows and Linux.
+    shutil.copy(os.path.join(__folder__, "qt-creator", "LICENSE.GPL3-EXCEPT"),
+                os.path.join(installdir, "LICENSE.GPL3-EXCEPT.txt"))
+
     cxx_flags_init = ""
     if args.factory:
         cxx_flags_init += "-DOPENMV_FACTORY_IDE "
@@ -432,7 +439,7 @@ def make():
         if not args.no_build_installer:
             if os.system("cd " + builddir +
             " && cd install" +
-            " && archivegen -f zip ../" + installer_archive_name + " bin lib share" +
+            " && archivegen -f zip ../" + installer_archive_name + " bin lib share LICENSE.GPL3-EXCEPT.txt" +
             " && cd .." +
             " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion +
@@ -462,7 +469,7 @@ def make():
                 shutil.rmtree(output_dir)
             shutil.copytree(os.path.join(builddir, "install"), output_dir)
             if os.system("cd " + output_dir +
-            " && archivegen -f zip -c 9 ../" + installer_name + " bin lib share README.txt setup.cmd"):
+            " && archivegen -f zip -c 9 ../" + installer_name + " bin lib share README.txt setup.cmd LICENSE.GPL3-EXCEPT.txt"):
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('darwin'):
@@ -529,7 +536,7 @@ def make():
         if not args.no_build_installer:
             if os.system("cd " + builddir +
             " && cd install"
-            " && archivegen ../" + installer_archive_name + " bin lib share" +
+            " && archivegen ../" + installer_archive_name + " bin lib share LICENSE.GPL3-EXCEPT.txt" +
             " && cd .."
             " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion + " -a " + installer_archive_name +
