@@ -298,6 +298,9 @@ def make():
     parser.add_argument("--factory", action='store_true', default=False,
     help = "Build OpenMV IDE for the factory")
 
+    parser.add_argument("--viewer", action='store_true', default=False,
+    help = "Build the OpenMV Viewer (forced viewer-mode) variant")
+
     args = parser.parse_args()
 
     if args.rpi and not sys.platform.startswith('linux'):
@@ -314,9 +317,24 @@ def make():
 
     ideversion = get_ideversion(__folder__)
 
+    # The viewer variant is selected via a single CMake cache option. That option
+    # drives both the branding overrides (executable id, display name, settings
+    # store, bundle id -- see QtCreatorIDEBranding.cmake) and the OPENMV_VIEWER_IDE
+    # compile definition that forces viewer mode in main.cpp (added in CMakeLists).
+    viewer_cmake = " \"-DOPENMV_VIEWER_IDE:BOOL=ON\"" if args.viewer else ""
+
+    # Variant-specific names used for signing, bundles, desktop entries, and the
+    # installer/archive file names. The viewer is a separate product; otherwise this
+    # is the full IDE. The icon resource is shared for now (resources not reduced yet).
+    app_id = "openmvviewer" if args.viewer else "openmvide"
+    app_name = "OpenMV Viewer" if args.viewer else "OpenMV IDE"
+    app_cased_id = "OpenMVViewer" if args.viewer else "OpenMVIDE"
+    app_folder = "openmv-viewer" if args.viewer else "openmv-ide"
+    app_icon = "OpenMV-openmvide"
+
     builddir = os.path.join(__folder__, "build")
     installdir = os.path.join(builddir, "install")
-    if args.rpi: installdir = os.path.join(builddir, "openmv-ide")
+    if args.rpi: installdir = os.path.join(builddir, app_folder)
 
     if not os.path.exists(builddir):
         os.mkdir(builddir)
@@ -342,6 +360,7 @@ def make():
     if args.rpi:
         installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
+        if args.viewer: installer_name = installer_name.replace("openmv-ide", "openmv-viewer")
         if not args.no_build_application:
             os.makedirs(os.path.join(installdir, "lib/Qt/lib"), exist_ok=True)
             if os.system("cd " + builddir +
@@ -354,11 +373,11 @@ def make():
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_C_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-gcc-9\"" +
                 " \"-DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-g++-9\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
                 " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
             " && cmake --build . --target all" +
-            " && cmake --install . --prefix openmv-ide" +
-            " && cmake --install . --prefix openmv-ide --component Dependencies" +
+            " && cmake --install . --prefix " + app_folder +
+            " && cmake --install . --prefix " + app_folder + " --component Dependencies" +
             " && mv share/qtcreator/arm install/share/qtcreator/arm" +
             " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai" +
             " && rm -rf bin" + # Save disk space
@@ -368,10 +387,10 @@ def make():
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
             with open(os.path.join(installdir, "README.txt"), 'w') as f:
-                f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
+                f.write("Please run setup.sh to install " + app_name + " dependencies:\n\n")
                 f.write("    ./setup.sh\n\n")
-                f.write("And then run OpenMV IDE:\n\n")
-                f.write("    ./bin/openmvide\n")
+                f.write("And then run " + app_name + ":\n\n")
+                f.write("    ./bin/" + app_id + "\n")
             with open(os.path.join(installdir, "setup.sh"), 'w') as f:
                 f.write("#! /bin/sh\n\n")
                 f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
@@ -386,31 +405,32 @@ def make():
                 f.write("sudo cp -r \"$DIR/share/icons\" /usr/share/\n")
                 f.write("rm -rf \"$DIR/share/icons\"\n")
                 f.write("sudo gtk-update-icon-cache\n\n")
-                f.write("cat > \"/home/$USER/Desktop/openmvide.desktop\" << EOM\n")
+                f.write("cat > \"/home/$USER/Desktop/" + app_id + ".desktop\" << EOM\n")
                 f.write("[Desktop Entry]\n")
                 f.write("Type=Application\n")
-                f.write("Name=OpenMV IDE\n")
-                f.write("GenericName=OpenMV IDE\n")
+                f.write("Name=" + app_name + "\n")
+                f.write("GenericName=" + app_name + "\n")
                 f.write("Comment=The IDE of choice for OpenMV Cam Development.\n")
-                f.write("Exec=\"$DIR/bin/openmvide\" %F\n")
-                f.write("Icon=OpenMV-openmvide\n")
+                f.write("Exec=\"$DIR/bin/" + app_id + "\" %F\n")
+                f.write("Icon=" + app_icon + "\n")
                 f.write("Terminal=false\n")
                 f.write("Categories=Development;IDE;Electronics;OpenMV;\n")
                 f.write("MimeType=text/x-python;\n")
                 f.write("Keywords=embedded electronics;electronics;microcontroller;micropython;computer vision;machine vision;\n")
-                f.write("StartupWMClass=openmvide\n")
+                f.write("StartupWMClass=" + app_id + "\n")
                 f.write("EOM\n")
-                f.write("cp \"/home/$USER/Desktop/openmvide.desktop\"  \"/home/$USER/.local/share/applications/\"\n")
-                f.write("sudo cp \"/home/$USER/Desktop/openmvide.desktop\" /usr/share/applications/\n")
+                f.write("cp \"/home/$USER/Desktop/" + app_id + ".desktop\"  \"/home/$USER/.local/share/applications/\"\n")
+                f.write("sudo cp \"/home/$USER/Desktop/" + app_id + ".desktop\" /usr/share/applications/\n")
             os.chmod(os.path.join(installdir, "setup.sh"),
                 os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             if os.system("cd " + builddir +
-            " && tar -czvf " + installer_name + " openmv-ide"):
+            " && tar -czvf " + installer_name + " " + app_folder):
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
+        if args.viewer: installer_name = installer_name.replace("openmv-ide", "openmv-viewer")
         installer_archive_name = installer_name + "-installer-archive.zip"
         if not args.no_build_application:
             if os.system("cd " + builddir +
@@ -421,7 +441,7 @@ def make():
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_C_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/gcc.exe") + "\"" +
                 " \"-DCMAKE_CXX_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/g++.exe") + "\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies" +
@@ -434,7 +454,7 @@ def make():
                 sys.exit("Make Failed...")
         if not args.no_sign_application:
             if os.system("cd " + builddir +
-            " && python -u ../qt-creator/scripts/sign.py install/bin/openmvide.exe"):
+            " && python -u ../qt-creator/scripts/sign.py install/bin/" + app_id + ".exe"):
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
             if os.system("cd " + builddir +
@@ -443,6 +463,7 @@ def make():
             " && cd .." +
             " && python -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
             " -v " + ideversion +
+            " --name \"" + app_name + "\" --app-id " + app_id + " --app-cased-id " + app_cased_id +
             " -a " + installer_archive_name + " " + installer_name):
                 sys.exit("Make Failed...")
             if not args.no_sign_installer:
@@ -451,10 +472,10 @@ def make():
                     sys.exit("Make Failed...")
         else:
             with open(os.path.join(installdir, "README.txt"), 'w') as f:
-                f.write("Please run setup.cmd to install OpenMV IDE's drivers:\r\n\r\n")
+                f.write("Please run setup.cmd to install " + app_name + "'s drivers:\r\n\r\n")
                 f.write("    Double click on setup.cmd\r\n\r\n")
-                f.write("And then to run OpenMV IDE:\r\n\r\n")
-                f.write("    Double click on bin\\openmvide.exe\r\n")
+                f.write("And then to run " + app_name + ":\r\n\r\n")
+                f.write("    Double click on bin\\" + app_id + ".exe\r\n")
             with open(os.path.join(installdir, "setup.cmd"), 'w') as f:
                 f.write("@echo off\r\n")
                 f.write("NET FILE 1>NUL 2>NUL & IF ERRORLEVEL 1 (ECHO You must right-click this file and select \"Run as administrator\" to run the setup script. & ECHO. & PAUSE & EXIT /D)\r\n")
@@ -464,7 +485,7 @@ def make():
                 f.write("cmd /c \"%~dp0\\share\\qtcreator\\drivers\\dfuse.cmd\"\r\n")
                 f.write("cmd /c \"%~dp0\\share\\qtcreator\\drivers\\vcr.cmd\"\r\n")
                 f.write("ECHO All drivers have been successfully installed! & ECHO. & PAUSE & EXIT /D\r\n")
-            output_dir = os.path.join(builddir, "openmv-ide")
+            output_dir = os.path.join(builddir, app_folder)
             if os.path.exists(output_dir):
                 shutil.rmtree(output_dir)
             shutil.copytree(os.path.join(builddir, "install"), output_dir)
@@ -475,13 +496,14 @@ def make():
     elif sys.platform.startswith('darwin'):
         installer_name = "openmv-ide-mac-arm-" + ideversion + ".dmg"
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
+        if args.viewer: installer_name = installer_name.replace("openmv-ide", "openmv-viewer")
         if not args.no_build_application:
             if os.system("cd " + builddir +
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix . --component Dependencies" +
             " && rm -rf share" # Save disk space
@@ -489,18 +511,18 @@ def make():
                 sys.exit("Make Failed...")
         if not args.no_sign_application:
             if os.system("cd " + builddir +
-            " && python3 -u ../qt-creator/scripts/sign.py \"OpenMV IDE.app\" || true" +
-            " && codesign -s Application --force --options=runtime --timestamp \"OpenMV IDE.app\" || true"
-            " && ditto -c -k -rsrc --sequesterRsrc --keepParent OpenMV\\ IDE.app OpenMV\\ IDE.zip" +
-            " && ( ok=0; for i in 1 2 3 4 5; do "
-            " xcrun notarytool submit OpenMV\\ IDE.zip --keychain-profile \"AC_PASSWORD\" --wait && ok=1 && break; "
-            " sleep 30; "
-            " done; [ \"$ok\" = \"1\" ] && xcrun stapler staple OpenMV\\ IDE.app ) || true" +
-            " && rm \"OpenMV IDE.zip\" || true"):
+            " && python3 -u ../qt-creator/scripts/sign.py \"" + app_name + ".app\" || true" +
+            " && codesign -s Application --force --options=runtime --timestamp \"" + app_name + ".app\" || true" +
+            " && ditto -c -k -rsrc --sequesterRsrc --keepParent \"" + app_name + ".app\" \"" + app_name + ".zip\"" +
+            " && ( ok=0; for i in 1 2 3 4 5; do " +
+            " xcrun notarytool submit \"" + app_name + ".zip\" --keychain-profile \"AC_PASSWORD\" --wait && ok=1 && break; " +
+            " sleep 30; " +
+            " done; [ \"$ok\" = \"1\" ] && xcrun stapler staple \"" + app_name + ".app\" ) || true" +
+            " && rm \"" + app_name + ".zip\" || true"):
                 sys.exit("Make Failed...")
         if not args.no_build_installer:
             if os.system("cd " + builddir +
-            " && ../qt-creator/scripts/makedmg.sh OpenMV\\ IDE.app " + installer_name):
+            " && ../qt-creator/scripts/makedmg.sh \"" + app_name + ".app\" " + installer_name):
                 sys.exit("Make Failed...")
         if not args.no_sign_installer:
             if os.system("cd " + builddir +
@@ -514,6 +536,7 @@ def make():
     elif sys.platform.startswith('linux'):
         installer_name = "openmv-ide-linux-x86_64-" + ideversion
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
+        if args.viewer: installer_name = installer_name.replace("openmv-ide", "openmv-viewer")
         installer_archive_name = installer_name + "-installer-archive.7z"
         if not args.no_build_application:
             if os.system("cd " + builddir +
@@ -522,7 +545,7 @@ def make():
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" +
+                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies" +
@@ -539,16 +562,18 @@ def make():
             " && archivegen ../" + installer_archive_name + " bin lib share LICENSE.GPL3-EXCEPT.txt" +
             " && cd .."
             " && python3 -u ../qt-creator/scripts/packageIfw.py -i " + ifdir +
-            " -v " + ideversion + " -a " + installer_archive_name +
+            " -v " + ideversion +
+            " --name \"" + app_name + "\" --app-id " + app_id + " --app-cased-id " + app_cased_id +
+            " -a " + installer_archive_name +
             " " + installer_name):
                 sys.exit("Make Failed...")
 
         else:
             with open(os.path.join(installdir, "README.txt"), 'w') as f:
-                f.write("Please run setup.sh to install OpenMV IDE dependencies:\n\n")
+                f.write("Please run setup.sh to install " + app_name + " dependencies:\n\n")
                 f.write("    ./setup.sh\n\n")
-                f.write("And then run OpenMV IDE:\n\n")
-                f.write("    ./bin/openmvide\n")
+                f.write("And then run " + app_name + ":\n\n")
+                f.write("    ./bin/" + app_id + "\n")
             with open(os.path.join(installdir, "setup.sh"), 'w') as f:
                 f.write("#! /bin/sh\n\n")
                 f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
@@ -561,28 +586,28 @@ def make():
                 f.write("sudo cp -r \"$DIR/share/icons\" /usr/share/\n")
                 f.write("rm -rf \"$DIR/share/icons\"\n")
                 f.write("sudo gtk-update-icon-cache\n\n")
-                f.write("cat > \"/home/$USER/Desktop/openmvide.desktop\" << EOM\n")
+                f.write("cat > \"/home/$USER/Desktop/" + app_id + ".desktop\" << EOM\n")
                 f.write("[Desktop Entry]\n")
                 f.write("Type=Application\n")
-                f.write("Name=OpenMV IDE\n")
-                f.write("GenericName=OpenMV IDE\n")
+                f.write("Name=" + app_name + "\n")
+                f.write("GenericName=" + app_name + "\n")
                 f.write("Comment=The IDE of choice for OpenMV Cam Development.\n")
-                f.write("Exec=\"$DIR/bin/openmvide\" %F\n")
-                f.write("Icon=OpenMV-openmvide\n")
+                f.write("Exec=\"$DIR/bin/" + app_id + "\" %F\n")
+                f.write("Icon=" + app_icon + "\n")
                 f.write("Terminal=false\n")
                 f.write("Categories=Development;IDE;Electronics;OpenMV;\n")
                 f.write("MimeType=text/x-python;\n")
                 f.write("Keywords=embedded electronics;electronics;microcontroller;micropython;computer vision;machine vision;\n")
-                f.write("StartupWMClass=openmvide\n")
+                f.write("StartupWMClass=" + app_id + "\n")
                 f.write("EOM\n")
-                f.write("cp \"/home/$USER/Desktop/openmvide.desktop\"  \"/home/$USER/.local/share/applications/\"\n")
-                f.write("sudo cp \"/home/$USER/Desktop/openmvide.desktop\" /usr/share/applications/\n")
+                f.write("cp \"/home/$USER/Desktop/" + app_id + ".desktop\"  \"/home/$USER/.local/share/applications/\"\n")
+                f.write("sudo cp \"/home/$USER/Desktop/" + app_id + ".desktop\" /usr/share/applications/\n")
             os.chmod(os.path.join(installdir, "setup.sh"),
                 os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
             if os.system("cd " + builddir +
-            " && rm -rf openmv-ide"
-            " && mv install openmv-ide"
-            " && tar -czvf " + installer_name + ".tar.gz openmv-ide"):
+            " && rm -rf " + app_folder +
+            " && mv install " + app_folder +
+            " && tar -czvf " + installer_name + ".tar.gz " + app_folder):
                 sys.exit("Make Failed...")
 
     else:
