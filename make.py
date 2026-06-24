@@ -332,6 +332,13 @@ def make():
     app_folder = "openmv-viewer" if args.viewer else "openmv-ide"
     app_icon = "OpenMV-openmvide"
 
+    # The downloaded toolchains (ST Edge-AI + ARM GCC) are copied into the build by
+    # cmake and then moved into the install tree here. The viewer doesn't ship them
+    # (cmake leaves downloaded_resource_directories empty), so skip the moves.
+    mv_downloaded = ("" if args.viewer else
+        " && mv share/qtcreator/arm install/share/qtcreator/arm"
+        " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai")
+
     builddir = os.path.join(__folder__, "build")
     installdir = os.path.join(builddir, "install")
     if args.rpi: installdir = os.path.join(builddir, app_folder)
@@ -378,8 +385,7 @@ def make():
             " && cmake --build . --target all" +
             " && cmake --install . --prefix " + app_folder +
             " && cmake --install . --prefix " + app_folder + " --component Dependencies" +
-            " && mv share/qtcreator/arm install/share/qtcreator/arm" +
-            " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai" +
+            mv_downloaded +
             " && rm -rf bin" + # Save disk space
             " && rm -rf lib" + # Save disk space
             " && rm -rf share" + # Save disk space
@@ -445,8 +451,7 @@ def make():
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies" +
-            " && mv share/qtcreator/arm install/share/qtcreator/arm" +
-            " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai" +
+            mv_downloaded +
             " && rm -rf bin" + # Save disk space
             " && rm -rf lib" + # Save disk space
             " && rm -rf share" + # Save disk space
@@ -549,8 +554,7 @@ def make():
             " && cmake --build . --target all" +
             " && cmake --install . --prefix install" +
             " && cmake --install . --prefix install --component Dependencies" +
-            " && mv share/qtcreator/arm install/share/qtcreator/arm" +
-            " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai" +
+            mv_downloaded +
             " && rm -rf bin" + # Save disk space
             " && rm -rf lib" + # Save disk space
             " && rm -rf share" + # Save disk space
