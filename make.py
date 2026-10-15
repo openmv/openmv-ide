@@ -369,6 +369,7 @@ def make():
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DWITH_QMLDESIGNER:BOOL=OFF\"" +
                 " \"-DQT_QMAKE_EXECUTABLE:FILEPATH=" + os.path.join(qtdir, "bin/qmake.exe") + "\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_C_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/gcc.exe") + "\"" +
@@ -433,6 +434,7 @@ def make():
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DWITH_QMLDESIGNER:BOOL=OFF\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
             " && cmake --build . --target all" +
@@ -476,6 +478,7 @@ def make():
                 " -Wno-dev" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DWITH_QMLDESIGNER:BOOL=OFF\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
             " && cmake --build . --target all" +

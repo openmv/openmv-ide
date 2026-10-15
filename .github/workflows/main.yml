@@ -92,6 +92,10 @@ jobs:
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || matrix.map.host == 'windows-viewer'
       uses: jurplel/install-qt-action@v4
       with:
+        # PyPI aqtinstall 3.3.0 resolves the wrong repo path for Qt 6.12 Windows
+        # (the old combined qt6_6120/qt6_6120 instead of qt6_6120/qt6_6120_mingw);
+        # the fix is only in aqt git master, so pin a known-good master commit.
+        aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@076e1659807d0b362a3ed684d54c2e9c775eb9c7'
         version: '6.12.0'
         host: 'windows'
         target: 'desktop'
