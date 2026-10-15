@@ -92,7 +92,6 @@ jobs:
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || matrix.map.host == 'windows-viewer'
       uses: jurplel/install-qt-action@v4
       with:
-        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
         version: '6.12.0'
         host: 'windows'
         target: 'desktop'
@@ -106,11 +105,10 @@ jobs:
       if: matrix.map.host == 'linux' || matrix.map.host == 'linux-viewer'
       uses: jurplel/install-qt-action@v4
       with:
-        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
         version: '6.12.0'
         host: 'linux'
         target: 'desktop'
-        arch: 'gcc_64'
+        arch: 'linux_gcc_64'
         dir: '/home/runner'
         modules: 'qtimageformats qtserialport qt5compat'
         cache: true
@@ -120,7 +118,6 @@ jobs:
       if: matrix.map.host == 'mac-arm' || matrix.map.host == 'mac-arm-viewer'
       uses: jurplel/install-qt-action@v4
       with:
-        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
         version: '6.12.0'
         host: 'mac'
         target: 'desktop'

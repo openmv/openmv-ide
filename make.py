@@ -348,7 +348,7 @@ def make():
     # under alongside the application files (the mac .dmg already includes this
     # via makedmg.sh). The installer/portable archives are built from installdir,
     # so dropping it here covers Windows and Linux.
-    shutil.copy(os.path.join(__folder__, "qt-creator", "LICENSE.GPL3-EXCEPT"),
+    shutil.copy(os.path.join(__folder__, "qt-creator", "LICENSES", "LICENSE.GPL3-EXCEPT"),
                 os.path.join(installdir, "LICENSE.GPL3-EXCEPT.txt"))
 
     cxx_flags_init = ""
