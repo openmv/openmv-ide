@@ -101,7 +101,7 @@ jobs:
         target: 'desktop'
         arch: 'win64_mingw'
         dir: 'C:\Users\runneradmin'
-        modules: 'qtimageformats qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
         cache: true
         tools: 'tools_cmake tools_ifw tools_ninja tools_mingw1310'
 
@@ -114,7 +114,7 @@ jobs:
         target: 'desktop'
         arch: 'linux_gcc_64'
         dir: '/home/runner'
-        modules: 'qtimageformats qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
         cache: true
         tools: 'tools_cmake tools_ifw tools_ninja'
 
@@ -127,7 +127,7 @@ jobs:
         target: 'desktop'
         arch: 'clang_64'
         dir: '/Users/runner'
-        modules: 'qtimageformats qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
         cache: true
         tools: 'tools_cmake tools_ninja'
 
@@ -140,7 +140,7 @@ jobs:
         target: 'desktop'
         arch: 'linux_gcc_arm64'
         dir: '/home/runner'
-        modules: 'qtimageformats qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
         cache: true
 
     - name: '🏗 Build IDE on Windows'
