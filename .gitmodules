@@ -5,4 +5,4 @@
 [submodule "qt-creator"]
 	path = qt-creator
 	url = https://github.com/openmv/qt-creator.git
-	branch = openmv-new
+	branch = openmv-qtc-20.0.2
