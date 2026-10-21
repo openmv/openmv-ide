@@ -16,7 +16,6 @@ jobs:
     runs-on: ${{ matrix.map.os }}
     strategy:
       matrix:
-        # {os: ubuntu-22.04, host: linux-rpi, suffix: tar.gz}
         map: [{os: windows-2022, host: windows, suffix: exe},
               {os: windows-2022, host: windows, suffix: zip},
               {os: windows-2022, host: windows-factory, suffix: exe},
@@ -27,6 +26,8 @@ jobs:
               {os: ubuntu-22.04-large, host: linux, suffix: tar.gz},
               {os: ubuntu-22.04-large, host: linux-viewer, suffix: run},
               {os: ubuntu-22.04-large, host: linux-viewer, suffix: tar.gz},
+              {os: ubuntu-24.04-arm, host: linux-arm, suffix: tar.gz},
+              {os: ubuntu-24.04-arm, host: linux-arm-viewer, suffix: tar.gz},
               {os: macos-15, host: mac-arm, suffix: dmg},
               {os: macos-15, host: mac-arm-viewer, suffix: dmg}]
       fail-fast: false
@@ -91,27 +92,29 @@ jobs:
       if: matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || matrix.map.host == 'windows-viewer'
       uses: jurplel/install-qt-action@v4
       with:
-        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
-        version: '6.5.1'
+        # PyPI aqtinstall 3.3.0 resolves the wrong repo path for Qt 6.12 Windows
+        # (the old combined qt6_6120/qt6_6120 instead of qt6_6120/qt6_6120_mingw);
+        # the fix is only in aqt git master, so pin a known-good master commit.
+        aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@076e1659807d0b362a3ed684d54c2e9c775eb9c7'
+        version: '6.12.0'
         host: 'windows'
         target: 'desktop'
         arch: 'win64_mingw'
         dir: 'C:\Users\runneradmin'
-        modules: 'qtimageformats qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
         cache: true
-        tools: 'tools_cmake tools_ifw tools_ninja tools_mingw90'
+        tools: 'tools_cmake tools_ifw tools_ninja tools_mingw1310'
 
     - name: '⬇ Install Qt on Linux'
       if: matrix.map.host == 'linux' || matrix.map.host == 'linux-viewer'
       uses: jurplel/install-qt-action@v4
       with:
-        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
-        version: '6.5.1'
+        version: '6.12.0'
         host: 'linux'
         target: 'desktop'
-        arch: 'gcc_64'
+        arch: 'linux_gcc_64'
         dir: '/home/runner'
-        modules: 'qtimageformats qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
         cache: true
         tools: 'tools_cmake tools_ifw tools_ninja'
 
@@ -119,71 +122,26 @@ jobs:
       if: matrix.map.host == 'mac-arm' || matrix.map.host == 'mac-arm-viewer'
       uses: jurplel/install-qt-action@v4
       with:
-        aqtsource: 'git+https://github.com/Kidev/aqtinstall.git@tools_ifw_fix'
-        version: '6.5.1'
+        version: '6.12.0'
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
         dir: '/Users/runner'
-        modules: 'qtimageformats qtserialport qt5compat'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
         cache: true
         tools: 'tools_cmake tools_ninja'
 
-    - name: '⬇ Install Qt Cross-Compile for Raspberry Pi'
-      if: matrix.map.host == 'linux-rpi'
-      run: |
-        sudo apt-mark hold grub-efi-amd64-signed
-        sudo apt update --fix-missing -y
-        sudo apt upgrade -y
-        sudo apt-get install -y make
-        sudo apt-get install -y build-essential
-        sudo apt-get install -y libclang-dev
-        sudo apt-get install -y ninja-build
-        sudo apt-get install -y gcc
-        sudo apt-get install -y git
-        sudo apt-get install -y bison
-        sudo apt-get install -y python3
-        sudo apt-get install -y gperf
-        sudo apt-get install -y pkg-config
-        sudo apt-get install -y libfontconfig1-dev
-        sudo apt-get install -y libfreetype6-dev
-        sudo apt-get install -y libx11-dev
-        sudo apt-get install -y libx11-xcb-dev
-        sudo apt-get install -y libxext-dev
-        sudo apt-get install -y libxfixes-dev
-        sudo apt-get install -y libxi-dev
-        sudo apt-get install -y libxrender-dev
-        sudo apt-get install -y libxcb1-dev
-        sudo apt-get install -y libxcb-glx0-dev
-        sudo apt-get install -y libxcb-keysyms1-dev
-        sudo apt-get install -y libxcb-image0-dev
-        sudo apt-get install -y libxcb-shm0-dev
-        sudo apt-get install -y libxcb-icccm4-dev
-        sudo apt-get install -y libxcb-sync-dev
-        sudo apt-get install -y libxcb-xfixes0-dev
-        sudo apt-get install -y libxcb-shape0-dev
-        sudo apt-get install -y libxcb-randr0-dev
-        sudo apt-get install -y libxcb-render-util0-dev
-        sudo apt-get install -y libxcb-util-dev
-        sudo apt-get install -y libxcb-xinerama0-dev
-        sudo apt-get install -y libxcb-xkb-dev
-        sudo apt-get install -y libxkbcommon-dev
-        sudo apt-get install -y libxkbcommon-x11-dev
-        sudo apt-get install -y libatspi2.0-dev
-        sudo apt-get install -y libgl1-mesa-dev
-        sudo apt-get install -y libglu1-mesa-dev
-        sudo apt-get install -y freeglut3-dev
-        sudo apt-get install -y gcc-aarch64-linux-gnu
-        sudo apt-get install -y g++-aarch64-linux-gnu
-        sudo apt-get install -y libclang-11-dev
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-        sudo apt-get update -y
-        sudo apt-get upgrade -y libstdc++6
-        strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
-        sudo cp cross-compile-ldd /usr/bin/aarch64-linux-gnu-ldd
-        cd ~
-        wget https://github.com/openmv/qt-raspi/releases/download/v6.5.1/qt-raspi.tar.gz
-        tar -xzvf qt-raspi.tar.gz
+    - name: '⬇ Install Qt on Linux arm64'
+      if: matrix.map.host == 'linux-arm' || matrix.map.host == 'linux-arm-viewer'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.12.0'
+        host: 'linux_arm64'
+        target: 'desktop'
+        arch: 'linux_gcc_arm64'
+        dir: '/home/runner'
+        modules: 'qtimageformats qtserialport qt5compat qthttpserver'
+        cache: true
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows' && matrix.map.suffix == 'exe'
@@ -240,6 +198,13 @@ jobs:
         sudo apt-get install -y chrpath
         python make.py --no-build-installer
 
+    - name: '🏗 Build IDE on Linux arm64 .tar.gz'
+      if: matrix.map.host == 'linux-arm' && matrix.map.suffix == 'tar.gz'
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y chrpath libglib2.0-0 libgl1 libegl1 libfontconfig1 libfreetype6 libxcb1 libxcb-cursor0 libxcb-glx0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render0 libxcb-render-util0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon0 libxkbcommon-x11-0 libdbus-1-3
+        python make.py --no-build-installer
+
     - name: '🏗 Build IDE on Mac'
       if: matrix.map.host == 'mac-arm'
       run: python make.py
@@ -274,13 +239,16 @@ jobs:
         sudo apt-get install -y chrpath
         python make.py --viewer --no-build-installer
 
+    - name: '🏗 Build Viewer on Linux arm64 .tar.gz'
+      if: matrix.map.host == 'linux-arm-viewer' && matrix.map.suffix == 'tar.gz'
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y chrpath libglib2.0-0 libgl1 libegl1 libfontconfig1 libfreetype6 libxcb1 libxcb-cursor0 libxcb-glx0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render0 libxcb-render-util0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 libxcb-xkb1 libxkbcommon0 libxkbcommon-x11-0 libdbus-1-3
+        python make.py --viewer --no-build-installer
+
     - name: '🏗 Build Viewer on Mac'
       if: matrix.map.host == 'mac-arm-viewer'
       run: python make.py --viewer
-
-    - name: '🏗 Build IDE on Linux for Raspberry Pi'
-      if: matrix.map.host == 'linux-rpi'
-      run: python make.py --rpi ~/qt-raspi
 
     - name: '⬆ Upload artifacts'
       if: github.event_name != 'pull_request'
