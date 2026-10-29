@@ -2,7 +2,7 @@
 
 # by: Kwabena W. Agyeman - kwagyeman@openmv.io
 
-import argparse, os, re, shutil, stat, sys
+import argparse, os, platform, re, shutil, stat, sys
 
 def match(d0, d1):
     x = [x for x in os.listdir(d0) if re.match(d1, x)]
@@ -18,13 +18,8 @@ def search(d0, d1):
 def search_all(d0, d1):
     return [os.path.join(d0, x) for x in os.listdir(d0) if re.search(d1, x)]
 
-def find_qtdir(rpi):
-    if rpi:
-        os.environ["QTDIR"] = rpi
-        path = os.path.join(rpi, "bin") + ':'
-        os.environ["PATH"] = path + os.environ["PATH"]
-        return rpi
-    elif sys.platform.startswith('win'):
+def find_qtdir():
+    if sys.platform.startswith('win'):
         qtdir = match(os.sep, r"Qt")
         if qtdir:
             qtdir = match(qtdir, r"\d+\.\d+(\.\d+)?")
@@ -280,9 +275,6 @@ def make():
     parser = argparse.ArgumentParser(description =
     "Make Script")
 
-    parser.add_argument("--rpi", nargs = '?',
-    help = "Qt 6 Cross-Compile QTDIR for the Raspberry Pi")
-
     parser.add_argument("--no-build-application", action='store_true', default=False,
     help = "Don't build the application")
 
@@ -303,12 +295,9 @@ def make():
 
     args = parser.parse_args()
 
-    if args.rpi and not sys.platform.startswith('linux'):
-        sys.exit("Linux Only")
-
     ###########################################################################
 
-    qtdir = find_qtdir(args.rpi)
+    qtdir = find_qtdir()
     mingwdir = find_mingwdir()
     find_cmakedir()
     find_ninjadir()
@@ -332,16 +321,22 @@ def make():
     app_folder = "openmv-viewer" if args.viewer else "openmv-ide"
     app_icon = "OpenMV-openmvide"
 
+    # arm64 Linux ships only the ARM GCC toolchain -- there is no arm64-Linux
+    # build of ST Edge-AI -- so cmake downloads no stedgeai there and we must not
+    # try to move it. Every other platform ships both.
+    linux_is_arm = (sys.platform.startswith('linux')
+                    and platform.machine() in ('aarch64', 'arm64'))
+
     # The downloaded toolchains (ST Edge-AI + ARM GCC) are copied into the build by
     # cmake and then moved into the install tree here. The viewer doesn't ship them
     # (cmake leaves downloaded_resource_directories empty), so skip the moves.
     mv_downloaded = ("" if args.viewer else
-        " && mv share/qtcreator/arm install/share/qtcreator/arm"
-        " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai")
+        " && mv share/qtcreator/arm install/share/qtcreator/arm" +
+        ("" if linux_is_arm else
+         " && mv share/qtcreator/stedgeai install/share/qtcreator/stedgeai"))
 
     builddir = os.path.join(__folder__, "build")
     installdir = os.path.join(builddir, "install")
-    if args.rpi: installdir = os.path.join(builddir, app_folder)
 
     if not os.path.exists(builddir):
         os.mkdir(builddir)
@@ -353,7 +348,7 @@ def make():
     # under alongside the application files (the mac .dmg already includes this
     # via makedmg.sh). The installer/portable archives are built from installdir,
     # so dropping it here covers Windows and Linux.
-    shutil.copy(os.path.join(__folder__, "qt-creator", "LICENSE.GPL3-EXCEPT"),
+    shutil.copy(os.path.join(__folder__, "qt-creator", "LICENSES", "LICENSE.GPL3-EXCEPT"),
                 os.path.join(installdir, "LICENSE.GPL3-EXCEPT.txt"))
 
     cxx_flags_init = ""
@@ -364,76 +359,7 @@ def make():
         cxx_flags_init += "-DFORCE_AUTO_UPDATE=release "
         cxx_flags_init += "-DFORCE_AUTO_RUN "
 
-    if args.rpi:
-        installer_name = "openmv-ide-linux-arm64-" + ideversion + ".tar.gz"
-        if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
-        if args.viewer: installer_name = installer_name.replace("openmv-ide", "openmv-viewer")
-        if not args.no_build_application:
-            os.makedirs(os.path.join(installdir, "lib/Qt/lib"), exist_ok=True)
-            if os.system("cd " + builddir +
-            " && wget http://ftp.us.debian.org/debian/pool/main/i/icu/libicu67_67.1-7_arm64.deb"
-            " && dpkg-deb -x libicu67_67.1-7_arm64.deb icu67"
-            " && cp -rv icu67/usr/lib/aarch64-linux-gnu/* openmv-ide/lib/Qt/lib/"
-            " && cmake ../qt-creator -Wno-dev" +
-                " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
-                " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
-                " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
-                " \"-DCMAKE_C_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-gcc-9\"" +
-                " \"-DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-g++-9\"" +
-                " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
-                " \"-DCMAKE_TOOLCHAIN_FILE:UNINITIALIZED=" + os.path.join(qtdir, "lib/cmake/Qt6/qt.toolchain.cmake") + "\"" +
-            " && cmake --build . --target all" +
-            " && cmake --install . --prefix " + app_folder +
-            " && cmake --install . --prefix " + app_folder + " --component Dependencies" +
-            mv_downloaded +
-            " && rm -rf bin" + # Save disk space
-            " && rm -rf lib" + # Save disk space
-            " && rm -rf share" + # Save disk space
-            " && rm -rf src"): # Save disk space
-                sys.exit("Make Failed...")
-        if not args.no_build_installer:
-            with open(os.path.join(installdir, "README.txt"), 'w') as f:
-                f.write("Please run setup.sh to install " + app_name + " dependencies:\n\n")
-                f.write("    ./setup.sh\n\n")
-                f.write("And then run " + app_name + ":\n\n")
-                f.write("    ./bin/" + app_id + "\n")
-            with open(os.path.join(installdir, "setup.sh"), 'w') as f:
-                f.write("#! /bin/sh\n\n")
-                f.write("DIR=\"$(dirname \"$(readlink -f \"$0\")\")\"\n\n")
-                f.write("sudo apt-get update -y\n")
-                f.write("sudo apt-get full-upgrade -y\n")
-                f.write("sudo apt-get install -y libboost-all-dev libudev-dev libinput-dev libts-dev libmtdev-dev libjpeg-dev libfontconfig1-dev libssl-dev libdbus-1-dev libglib2.0-dev libxkbcommon-dev libegl1-mesa-dev libgbm-dev libgles2-mesa-dev mesa-common-dev libasound2-dev libpulse-dev gstreamer1.0-omx libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev  gstreamer1.0-alsa libvpx-dev libsrtp2-dev libsnappy-dev libnss3-dev \"^libxcb.*\" flex bison libxslt-dev ruby gperf libbz2-dev libcups2-dev libatkmm-1.6-dev libxi6 libxcomposite1 libfreetype6-dev libicu-dev libsqlite3-dev libxslt1-dev libavcodec-dev libavformat-dev libswscale-dev libx11-dev freetds-dev libsqlite3-dev libpq-dev libiodbc2-dev firebird-dev libgst-dev libxext-dev libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync1 libxcb-sync-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-glx0-dev libxi-dev libdrm-dev libxcb-xinerama0 libxcb-xinerama0-dev libatspi2.0-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxss-dev libxtst-dev libpci-dev libcap-dev libxrandr-dev libdirectfb-dev libaudio-dev libxkbcommon-x11-dev libxcb-cursor0 build-essential\n\n")
-                f.write("sudo apt-get install -y libpng16-16 libusb-1.0 python3 python3-pip python3-usb\n")
-                f.write("sudo cp $DIR/share/qtcreator/pydfu/*.rules /etc/udev/rules.d/\n")
-                f.write("sudo udevadm trigger\n")
-                f.write("sudo udevadm control --reload-rules\n\n")
-                f.write("cp -r \"$DIR/share/icons\" \"/home/$USER/.local/share/icons\"\n")
-                f.write("sudo cp -r \"$DIR/share/icons\" /usr/share/\n")
-                f.write("rm -rf \"$DIR/share/icons\"\n")
-                f.write("sudo gtk-update-icon-cache\n\n")
-                f.write("cat > \"/home/$USER/Desktop/" + app_id + ".desktop\" << EOM\n")
-                f.write("[Desktop Entry]\n")
-                f.write("Type=Application\n")
-                f.write("Name=" + app_name + "\n")
-                f.write("GenericName=" + app_name + "\n")
-                f.write("Comment=The IDE of choice for OpenMV Cam Development.\n")
-                f.write("Exec=\"$DIR/bin/" + app_id + "\" %F\n")
-                f.write("Icon=" + app_icon + "\n")
-                f.write("Terminal=false\n")
-                f.write("Categories=Development;IDE;Electronics;OpenMV;\n")
-                f.write("MimeType=text/x-python;\n")
-                f.write("Keywords=embedded electronics;electronics;microcontroller;micropython;computer vision;machine vision;\n")
-                f.write("StartupWMClass=" + app_id + "\n")
-                f.write("EOM\n")
-                f.write("cp \"/home/$USER/Desktop/" + app_id + ".desktop\"  \"/home/$USER/.local/share/applications/\"\n")
-                f.write("sudo cp \"/home/$USER/Desktop/" + app_id + ".desktop\" /usr/share/applications/\n")
-            os.chmod(os.path.join(installdir, "setup.sh"),
-                os.stat(os.path.join(installdir, "setup.sh")).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-            if os.system("cd " + builddir +
-            " && tar -czvf " + installer_name + " " + app_folder):
-                sys.exit("Make Failed...")
-
-    elif sys.platform.startswith('win'):
+    if sys.platform.startswith('win'):
         installer_name = "openmv-ide-windows-" + ideversion
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         if args.viewer: installer_name = installer_name.replace("openmv-ide", "openmv-viewer")
@@ -443,6 +369,7 @@ def make():
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DWITH_QMLDESIGNER:BOOL=OFF\"" +
                 " \"-DQT_QMAKE_EXECUTABLE:FILEPATH=" + os.path.join(qtdir, "bin/qmake.exe") + "\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_C_COMPILER:FILEPATH=" + os.path.join(mingwdir, "bin/gcc.exe") + "\"" +
@@ -507,6 +434,7 @@ def make():
             " && cmake ../qt-creator" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DWITH_QMLDESIGNER:BOOL=OFF\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
             " && cmake --build . --target all" +
@@ -539,7 +467,8 @@ def make():
                 sys.exit("Make Failed...")
 
     elif sys.platform.startswith('linux'):
-        installer_name = "openmv-ide-linux-x86_64-" + ideversion
+        linux_arch = "arm64" if linux_is_arm else "x86_64"
+        installer_name = "openmv-ide-linux-" + linux_arch + "-" + ideversion
         if args.factory: installer_name = installer_name.replace("openmv", "openmv-factory")
         if args.viewer: installer_name = installer_name.replace("openmv-ide", "openmv-viewer")
         installer_archive_name = installer_name + "-installer-archive.7z"
@@ -549,6 +478,7 @@ def make():
                 " -Wno-dev" +
                 " \"-DCMAKE_GENERATOR:STRING=Ninja\"" +
                 " \"-DCMAKE_BUILD_TYPE:STRING=Release\"" +
+                " \"-DWITH_QMLDESIGNER:BOOL=OFF\"" +
                 " \"-DCMAKE_PREFIX_PATH:PATH=" + qtdir + "\"" +
                 " \"-DCMAKE_CXX_FLAGS_INIT:STRING=" + cxx_flags_init + "\"" + viewer_cmake +
             " && cmake --build . --target all" +
