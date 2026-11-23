@@ -17,11 +17,8 @@ jobs:
     strategy:
       matrix:
         map: [{os: windows-2022, host: windows, suffix: exe},
-              {os: windows-2022, host: windows, suffix: zip},
               {os: windows-2022, host: windows-factory, suffix: exe},
-              {os: windows-2022, host: windows-factory, suffix: zip},
               {os: windows-2022, host: windows-viewer, suffix: exe},
-              {os: windows-2022, host: windows-viewer, suffix: zip},
               {os: ubuntu-22.04-large, host: linux, suffix: run},
               {os: ubuntu-22.04-large, host: linux, suffix: tar.gz},
               {os: ubuntu-22.04-large, host: linux-viewer, suffix: run},
@@ -150,16 +147,7 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py
-
-    - name: '🏗 Build IDE on Windows'
-      if: matrix.map.host == 'windows' && matrix.map.suffix == 'zip'
-      env:
-        SM_HOST: ${{ secrets.SM_HOST }}
-        SM_API_KEY: ${{ secrets.SM_API_KEY }}
-        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-        SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py --no-build-installer
+      run: python make.py --build-zip
 
     - name: '🏗 Build IDE on Windows'
       if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'exe'
@@ -168,16 +156,7 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py --factory
-
-    - name: '🏗 Build IDE on Windows'
-      if: matrix.map.host == 'windows-factory' && matrix.map.suffix == 'zip'
-      env:
-        SM_HOST: ${{ secrets.SM_HOST }}
-        SM_API_KEY: ${{ secrets.SM_API_KEY }}
-        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-        SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py --factory --no-build-installer
+      run: python make.py --factory --build-zip
 
     - name: '🏗 Build IDE on Linux .run'
       if: matrix.map.host == 'linux' && matrix.map.suffix == 'run'
@@ -216,16 +195,7 @@ jobs:
         SM_API_KEY: ${{ secrets.SM_API_KEY }}
         SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
         SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py --viewer
-
-    - name: '🏗 Build Viewer on Windows'
-      if: matrix.map.host == 'windows-viewer' && matrix.map.suffix == 'zip'
-      env:
-        SM_HOST: ${{ secrets.SM_HOST }}
-        SM_API_KEY: ${{ secrets.SM_API_KEY }}
-        SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
-        SM_CODE_SIGNING_CERT_SHA1_HASH: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-      run: python make.py --viewer --no-build-installer
+      run: python make.py --viewer --build-zip
 
     - name: '🏗 Build Viewer on Linux .run'
       if: matrix.map.host == 'linux-viewer' && matrix.map.suffix == 'run'
@@ -264,6 +234,18 @@ jobs:
       with:
         name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}-zip
         path: 'build/openmv-*.zip'
+        if-no-files-found: error
+
+    # The Windows installer jobs also build the portable zip from the same (signed)
+    # binaries, so each binary is only signed once per variant.
+    - name: '⬆ Upload Windows zip'
+      if: github.event_name != 'pull_request' && (matrix.map.host == 'windows' || matrix.map.host == 'windows-factory' || matrix.map.host == 'windows-viewer')
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifact-${{ matrix.map.os }}-${{ matrix.map.host }}-${{ matrix.map.suffix }}-zip
+        path: |
+          build/openmv-*.zip
+          !build/openmv-*-installer-archive.zip
         if-no-files-found: error
 
     - name: '❖ Remove Windows Certificates'

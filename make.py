@@ -287,6 +287,9 @@ def make():
     parser.add_argument("--no-sign-installer", action='store_true', default=False,
     help = "Don't sign the installer on windows and mac")
 
+    parser.add_argument("--build-zip", action='store_true', default=False,
+    help = "Also build the portable zip alongside the installer on windows")
+
     parser.add_argument("--factory", action='store_true', default=False,
     help = "Build OpenMV IDE for the factory")
 
@@ -388,6 +391,14 @@ def make():
             if os.system("cd " + builddir +
             " && python -u ../qt-creator/scripts/sign.py install/bin/" + app_id + ".exe"):
                 sys.exit("Make Failed...")
+            # Smart App Control won't load unsigned DLLs. sign.py only signs directories
+            # on a release build, and skips files already signed by their vendor (Qt).
+            # The factory IDE runs on our own machines, so it doesn't need the quota.
+            if not args.factory:
+                if os.system("cd " + builddir +
+                " && python -u ../qt-creator/scripts/sign.py install/bin" +
+                " && python -u ../qt-creator/scripts/sign.py install/lib"):
+                    sys.exit("Make Failed...")
         if not args.no_build_installer:
             if os.system("cd " + builddir +
             " && cd install" +
@@ -402,7 +413,7 @@ def make():
                 if os.system("cd " + builddir +
                 " && python -u ../qt-creator/scripts/sign.py " + installer_name + ".exe"):
                     sys.exit("Make Failed...")
-        else:
+        if args.no_build_installer or args.build_zip:
             with open(os.path.join(installdir, "README.txt"), 'w') as f:
                 f.write("Please run setup.cmd to install " + app_name + "'s drivers:\r\n\r\n")
                 f.write("    Double click on setup.cmd\r\n\r\n")
